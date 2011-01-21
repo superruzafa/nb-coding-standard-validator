@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+OpenIDE-Module: org.superruzafa.codingstandardvalidator
+OpenIDE-Module-Localizing-Bundle: org/superruzafa/codingstandardvalidator/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+
