@@ -20,6 +20,10 @@ import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
+import org.openide.cookies.LineCookie;
+import org.openide.loaders.DataObject;
+import org.openide.loaders.DataObjectNotFoundException;
+import org.openide.text.Line;
 import org.openide.windows.Mode;
 import org.superruzafa.codingstandardvalidator.*;
 
@@ -35,6 +39,7 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     static final String ICON_PATH = "org/superruzafa/codingstandardvalidator/ui/codingstandardviolations.png";
     private static final String PREFERRED_ID = "CodingStandardViolationsTopComponent";
     private CodingStandardViolationsTableModel model;
+    private DataObject currentDataObject;
 
     public CodingStandardViolationsTopComponent() {
         initComponents();
@@ -119,6 +124,11 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         violationsTable.setRowHeight(20);
         violationsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         violationsTable.getTableHeader().setReorderingAllowed(false);
+        violationsTable.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                violationsTableMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(violationsTable);
 
         jScrollPane1.setBounds(20, 30, 190, 100);
@@ -181,6 +191,26 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         Component parent = evt.getComponent().getParent();
         evt.getComponent().setBounds(0, 0, parent.getWidth(), parent.getHeight());
     }//GEN-LAST:event_jLayered1Resized
+
+    private void violationsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_violationsTableMouseClicked
+        if (evt.getClickCount() == 2
+                && violationsTable.getSelectedRow() != -1) {
+            CodingStandardViolation violation = model.getRow(violationsTable.getSelectedRow());
+            DataObject dataObject = null;
+            try {
+                dataObject = DataObject.find(currentDataObject.getPrimaryFile());
+            } catch (DataObjectNotFoundException e) {
+            }
+            if (dataObject != null) {
+                LineCookie lineCookie = (LineCookie) dataObject.getCookie(LineCookie.class);
+                if (lineCookie != null) {
+                    Line line = lineCookie.getLineSet().getOriginal(violation.getLine() - 1);
+                    line.show(Line.ShowOpenType.OPEN, Line.ShowVisibilityType.FOCUS);
+                }
+            }
+
+        }
+    }//GEN-LAST:event_violationsTableMouseClicked
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLayeredPane jLayeredPane1;
     private javax.swing.JScrollPane jScrollPane1;
@@ -263,7 +293,8 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         return PREFERRED_ID;
     }
 
-    public void setViolations(CodingStandardViolation[] violations) {
+    public void setViolations(CodingStandardViolation[] violations, DataObject dataObject) {
+        this.currentDataObject = dataObject;
         model.clear();
         if (violations.length == 0) {
             jScrollPane1.setVisible(false);
@@ -289,12 +320,12 @@ class CodingStandardViolationsTableModel extends AbstractTableModel {
      */
     private static final String[] columnNames = {"", "Line", "Message"};
     private static final Class<?>[] columnClasses = {ImageIcon.class, String.class, String.class};
-    private ArrayList<CodingStandardViolation> allViolations;
+    private ArrayList<CodingStandardViolation> visibleViolations;
     private ArrayList<ArrayList<CodingStandardViolation>> violationsBySeverity;
     private boolean[] severityVisibility;
 
     public CodingStandardViolationsTableModel() {
-        allViolations = new ArrayList<CodingStandardViolation>();
+        visibleViolations = new ArrayList<CodingStandardViolation>();
         violationsBySeverity = new ArrayList<ArrayList<CodingStandardViolation>>();
         for (CodingStandardViolationSeverity severity : CodingStandardViolationSeverity.values()) {
             violationsBySeverity.add(new ArrayList<CodingStandardViolation>());
@@ -304,7 +335,7 @@ class CodingStandardViolationsTableModel extends AbstractTableModel {
 
     @Override
     public int getRowCount() {
-        return allViolations.size();
+        return visibleViolations.size();
     }
 
     @Override
@@ -326,7 +357,7 @@ class CodingStandardViolationsTableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         Object value = null;
 
-        CodingStandardViolation violation = allViolations.get(rowIndex);
+        CodingStandardViolation violation = visibleViolations.get(rowIndex);
         switch (columnIndex) {
             case 0: // Severity
                 switch (violation.getSeverity()) {
@@ -351,6 +382,10 @@ class CodingStandardViolationsTableModel extends AbstractTableModel {
         return value;
     }
 
+    public CodingStandardViolation getRow(int selectedRow) {
+        return visibleViolations.get(selectedRow);
+    }
+
     public boolean getSeverityVisibility(CodingStandardViolationSeverity severity) {
         return severityVisibility[severity.ordinal()];
     }
@@ -366,13 +401,13 @@ class CodingStandardViolationsTableModel extends AbstractTableModel {
     public void add(CodingStandardViolation violation) {
         violationsBySeverity.get(violation.getSeverity().ordinal()).add(violation);
         if (severityVisibility[violation.getSeverity().ordinal()]) {
-            allViolations.add(violation);
+            visibleViolations.add(violation);
             notifyListeners();
         }
     }
 
     void clear() {
-        allViolations.clear();
+        visibleViolations.clear();
         for (CodingStandardViolationSeverity severity : CodingStandardViolationSeverity.values()) {
             violationsBySeverity.get(severity.ordinal()).clear();
         }
@@ -380,13 +415,13 @@ class CodingStandardViolationsTableModel extends AbstractTableModel {
     }
 
     private void buildAllViolations() {
-        allViolations.clear();
+        visibleViolations.clear();
         for (CodingStandardViolationSeverity severity : CodingStandardViolationSeverity.values()) {
             if (severityVisibility[severity.ordinal()]) {
-                allViolations.addAll(violationsBySeverity.get(severity.ordinal()));
+                visibleViolations.addAll(violationsBySeverity.get(severity.ordinal()));
             }
         }
-        Collections.sort(allViolations, new Comparator<CodingStandardViolation>() {
+        Collections.sort(visibleViolations, new Comparator<CodingStandardViolation>() {
 
             @Override
             public int compare(CodingStandardViolation o1, CodingStandardViolation o2) {

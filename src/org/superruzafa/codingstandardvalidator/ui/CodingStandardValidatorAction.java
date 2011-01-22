@@ -37,7 +37,7 @@ public final class CodingStandardValidatorAction implements ActionListener {
              */
             codeSniffer.validate(context.getPrimaryFile());
             couldValidate = true;
-            window.setViolations(codeSniffer.getViolations());
+            window.setViolations(codeSniffer.getViolations(), context);
             window.open();
             window.requestActive();
         } catch (CodingStandardValidatorException ex) {
