@@ -255,10 +255,9 @@ public class CodeSniffer implements CodingStandardValidator {
      */
     private int run(ArrayList<String> parameters, StringBuilder output) throws IOException, InterruptedException {
         int result = -1;
-
         parameters.add(0, scriptPath);
-
-        Process process = Runtime.getRuntime().exec(parameters.toArray(new String[parameters.size()]));
+        String[] command = parameters.toArray(new String[parameters.size()]);
+        Process process = Runtime.getRuntime().exec(command);
         BufferedReader br = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
         String line = br.readLine();
@@ -267,7 +266,6 @@ public class CodeSniffer implements CodingStandardValidator {
             output.append("\n");
             line = br.readLine();
         }
-
         result = process.waitFor();
 
         return result;
