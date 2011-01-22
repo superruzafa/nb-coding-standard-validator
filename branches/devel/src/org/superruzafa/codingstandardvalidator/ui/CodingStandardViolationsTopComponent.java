@@ -4,11 +4,13 @@
  */
 package org.superruzafa.codingstandardvalidator.ui;
 
+import java.awt.Component;
 import java.awt.Image;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.logging.Logger;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -36,14 +38,18 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
 
     public CodingStandardViolationsTopComponent() {
         initComponents();
+        validCode.setVisible(false);
+
         setName(NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CTL_CodingStandardViolationsTopComponent"));
         setToolTipText(NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "HINT_CodingStandardViolationsTopComponent"));
         setIcon(ImageUtilities.loadImage(ICON_PATH, true));
 
-        violations.getColumnModel().getColumn(0).setMaxWidth(24);
-        violations.getColumnModel().getColumn(1).setMaxWidth(92);
+        violationsTable.getColumnModel().getColumn(0).setMinWidth(24);
+        violationsTable.getColumnModel().getColumn(0).setMaxWidth(24);
+        violationsTable.getColumnModel().getColumn(0).setResizable(false);
+        violationsTable.getColumnModel().getColumn(1).setMaxWidth(92);
 
-        model = (CodingStandardViolationsTableModel) violations.getModel();
+        model = (CodingStandardViolationsTableModel) violationsTable.getModel();
         model.setSeverityVisibility(CodingStandardViolationSeverity.Error, true);
         model.setSeverityVisibility(CodingStandardViolationSeverity.Warning, true);
     }
@@ -59,9 +65,13 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         jToolBar1 = new javax.swing.JToolBar();
         showErrors = new javax.swing.JToggleButton();
         showWarnings = new javax.swing.JToggleButton();
+        jLayeredPane1 = new javax.swing.JLayeredPane();
         jScrollPane1 = new javax.swing.JScrollPane();
-        violations = new javax.swing.JTable();
+        violationsTable = new javax.swing.JTable();
+        validCode = new javax.swing.JLabel();
+        jSeparator1 = new javax.swing.JSeparator();
 
+        jToolBar1.setBorder(null);
         jToolBar1.setFloatable(false);
         jToolBar1.setOrientation(1);
         jToolBar1.setRollover(true);
@@ -94,11 +104,42 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         });
         jToolBar1.add(showWarnings);
 
-        violations.setModel(new CodingStandardViolationsTableModel());
-        violations.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_LAST_COLUMN);
-        violations.setRowHeight(20);
-        violations.getTableHeader().setReorderingAllowed(false);
-        jScrollPane1.setViewportView(violations);
+        jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
+        jScrollPane1.addHierarchyBoundsListener(new java.awt.event.HierarchyBoundsListener() {
+            public void ancestorMoved(java.awt.event.HierarchyEvent evt) {
+            }
+            public void ancestorResized(java.awt.event.HierarchyEvent evt) {
+                jLayered1Resized(evt);
+            }
+        });
+
+        violationsTable.setModel(new CodingStandardViolationsTableModel());
+        violationsTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_LAST_COLUMN);
+        violationsTable.setFillsViewportHeight(true);
+        violationsTable.setRowHeight(20);
+        violationsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+        violationsTable.getTableHeader().setReorderingAllowed(false);
+        jScrollPane1.setViewportView(violationsTable);
+
+        jScrollPane1.setBounds(20, 30, 190, 100);
+        jLayeredPane1.add(jScrollPane1, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+        validCode.setBackground(javax.swing.UIManager.getDefaults().getColor("text"));
+        validCode.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        validCode.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/superruzafa/codingstandardvalidator/ui/ok_16.png"))); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(validCode, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.validCode.text")); // NOI18N
+        validCode.setOpaque(true);
+        validCode.addHierarchyBoundsListener(new java.awt.event.HierarchyBoundsListener() {
+            public void ancestorMoved(java.awt.event.HierarchyEvent evt) {
+            }
+            public void ancestorResized(java.awt.event.HierarchyEvent evt) {
+                jLayered1Resized(evt);
+            }
+        });
+        validCode.setBounds(220, 30, 160, 70);
+        jLayeredPane1.add(validCode, javax.swing.JLayeredPane.MODAL_LAYER);
+
+        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -107,12 +148,15 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 485, Short.MAX_VALUE))
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addComponent(jLayeredPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 272, Short.MAX_VALUE)
+            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
+            .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
+            .addComponent(jLayeredPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -133,12 +177,19 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         model.setSeverityVisibility(CodingStandardViolationSeverity.Warning, showWarnings.getModel().isSelected());
     }//GEN-LAST:event_showWarningsActionPerformed
 
+    private void jLayered1Resized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_jLayered1Resized
+        Component parent = evt.getComponent().getParent();
+        evt.getComponent().setBounds(0, 0, parent.getWidth(), parent.getHeight());
+    }//GEN-LAST:event_jLayered1Resized
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLayeredPane jLayeredPane1;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JToggleButton showErrors;
     private javax.swing.JToggleButton showWarnings;
-    private javax.swing.JTable violations;
+    private javax.swing.JLabel validCode;
+    private javax.swing.JTable violationsTable;
     // End of variables declaration//GEN-END:variables
 
     /**
@@ -210,6 +261,20 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     @Override
     protected String preferredID() {
         return PREFERRED_ID;
+    }
+
+    public void setViolations(CodingStandardViolation[] violations) {
+        model.clear();
+        if (violations.length == 0) {
+            jScrollPane1.setVisible(false);
+            validCode.setVisible(true);
+        } else {
+            for (CodingStandardViolation violation : violations) {
+                model.add(violation);
+            }
+            validCode.setVisible(false);
+            jScrollPane1.setVisible(true);
+        }
     }
 }
 
@@ -304,6 +369,14 @@ class CodingStandardViolationsTableModel extends AbstractTableModel {
             allViolations.add(violation);
             notifyListeners();
         }
+    }
+
+    void clear() {
+        allViolations.clear();
+        for (CodingStandardViolationSeverity severity : CodingStandardViolationSeverity.values()) {
+            violationsBySeverity.get(severity.ordinal()).clear();
+        }
+        notifyListeners();
     }
 
     private void buildAllViolations() {
