@@ -117,8 +117,7 @@ final class CodingStandardValidatorSettingsPanel extends javax.swing.JPanel {
     private void browseCodeSnifferScriptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_browseCodeSnifferScriptActionPerformed
         FileChooserBuilder fileChooser = new FileChooserBuilder(getClass());
         File file = fileChooser.showOpenDialog();
-        if (file != null)
-        {
+        if (file != null) {
             codeSnifferScript.setText(file.getAbsolutePath());
         }
     }//GEN-LAST:event_browseCodeSnifferScriptActionPerformed
@@ -136,16 +135,12 @@ final class CodingStandardValidatorSettingsPanel extends javax.swing.JPanel {
         }
         setCursor(Cursor.getDefaultCursor());
 
-        if (loaded)
-        {
-            DefaultComboBoxModel model = (DefaultComboBoxModel)codingStandard.getModel();
-            for (String cs : codeSniffer.getInstalledCodingStandards())
-            {
+        if (loaded) {
+            DefaultComboBoxModel model = (DefaultComboBoxModel) codingStandard.getModel();
+            for (String cs : codeSniffer.getInstalledCodingStandards()) {
                 model.addElement(cs);
             }
-        }
-        else
-        {
+        } else {
             NotifyDescriptor nd = new NotifyDescriptor.Message("A problem occurred while trying to autodetect the installed coding standards.\nPlease, be sure you have specified the correct path for the Code Sniffer script.", NotifyDescriptor.WARNING_MESSAGE);
             DialogDisplayer.getDefault().notify(nd);
         }
@@ -155,9 +150,11 @@ final class CodingStandardValidatorSettingsPanel extends javax.swing.JPanel {
         codeSnifferScript.setText(preferences.get("code-sniffer-script", ""));
         codingStandard.setSelectedItem(preferences.get("coding-standard", ""));
 
-        DefaultComboBoxModel model = (DefaultComboBoxModel)reportTypes.getModel();
+        DefaultComboBoxModel model = (DefaultComboBoxModel) reportTypes.getModel();
         int index = model.getIndexOf(preferences.get("report-type", ""));
-        if (index < 0) index = 0;
+        if (index < 0) {
+            index = 0;
+        }
         reportTypes.setSelectedIndex(index);
     }
 
