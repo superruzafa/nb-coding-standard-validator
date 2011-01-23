@@ -64,9 +64,11 @@
     </folder>
     <folder name="Menu">
         <folder name="Window">
-            <file name="CodingStandardViolationsAction.shadow">
-                <attr name="originalFile" stringvalue="Actions/Window/org-superruzafa-codingstandardvalidator-ui-CodingStandardViolationsAction.instance"/>
-            </file>
+            <folder name="Other">
+                <file name="CodingStandardViolationsAction.shadow">
+                    <attr name="originalFile" stringvalue="Actions/Window/org-superruzafa-codingstandardvalidator-ui-CodingStandardViolationsAction.instance"/>
+                </file>
+            </folder>
         </folder>
     </folder>
     <folder name="Windows2">

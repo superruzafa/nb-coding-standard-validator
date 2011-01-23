@@ -43,9 +43,9 @@ public class CodeSnifferTest {
     public void testValidate() throws CodingStandardValidatorException, URISyntaxException {
         File file = new File(getClass().getResource("sample.php").toURI());
         FileObject fo = FileUtil.toFileObject(FileUtil.normalizeFile(file));
-        codeSniffer.validate(fo);
+        CodingStandardValidationReport report = codeSniffer.validate(fo);
         if (false) {
-            for (CodingStandardViolation violation : codeSniffer.getViolations()) {
+            for (CodingStandardViolation violation : report.getViolations()) {
                 System.out.println(violation.getSeverity() + " at line " + violation.getLine() + ": " + violation.getMessage());
             }
         }

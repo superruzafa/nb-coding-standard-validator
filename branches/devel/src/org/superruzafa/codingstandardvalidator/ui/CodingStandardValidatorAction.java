@@ -3,11 +3,14 @@ package org.superruzafa.codingstandardvalidator.ui;
 import java.awt.Cursor;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.io.IOException;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
+import org.openide.cookies.EditorCookie;
 import org.openide.loaders.DataObject;
 import org.openide.util.Lookup;
 import org.openide.windows.WindowManager;
+import org.superruzafa.codingstandardvalidator.CodingStandardValidationReport;
 import org.superruzafa.codingstandardvalidator.CodingStandardValidatorException;
 import org.superruzafa.codingstandardvalidator.codesniffer.CodeSniffer;
 
@@ -32,14 +35,17 @@ public final class CodingStandardValidatorAction implements ActionListener {
         boolean couldValidate = false;
         String errorMessage = "";
         try {
-            /**
-             * @todo Save file before validate.
-             */
-            codeSniffer.validate(context.getPrimaryFile());
+            context.getLookup().lookup(EditorCookie.class).saveDocument();
+            CodingStandardValidationReport report = codeSniffer.validate(context.getPrimaryFile());
             couldValidate = true;
-            window.setViolations(codeSniffer.getViolations(), context);
-            window.open();
+            window.setReport(report);
+            if (!window.isOpened()) {
+                window.open();
+            }
             window.requestActive();
+        } catch (IOException ex) {
+            couldValidate = false;
+            errorMessage = ex.getMessage();
         } catch (CodingStandardValidatorException ex) {
             couldValidate = false;
             errorMessage = ex.getCause().getMessage();

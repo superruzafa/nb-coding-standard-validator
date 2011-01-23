@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package org.superruzafa.codingstandardvalidator.ui;
 
 import java.awt.Component;
@@ -39,7 +35,7 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     static final String ICON_PATH = "org/superruzafa/codingstandardvalidator/ui/codingstandardviolations.png";
     private static final String PREFERRED_ID = "CodingStandardViolationsTopComponent";
     private CodingStandardViolationsTableModel model;
-    private DataObject currentDataObject;
+    private CodingStandardValidationReport report;
 
     public CodingStandardViolationsTopComponent() {
         initComponents();
@@ -76,7 +72,6 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         validCode = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
 
-        jToolBar1.setBorder(null);
         jToolBar1.setFloatable(false);
         jToolBar1.setOrientation(1);
         jToolBar1.setRollover(true);
@@ -146,7 +141,7 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
                 jLayered1Resized(evt);
             }
         });
-        validCode.setBounds(220, 30, 160, 70);
+        validCode.setBounds(90, 30, 290, 70);
         jLayeredPane1.add(validCode, javax.swing.JLayeredPane.MODAL_LAYER);
 
         jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
@@ -160,7 +155,7 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(jLayeredPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 394, Short.MAX_VALUE))
+                .addComponent(jLayeredPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -198,11 +193,11 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
             CodingStandardViolation violation = model.getRow(violationsTable.getSelectedRow());
             DataObject dataObject = null;
             try {
-                dataObject = DataObject.find(currentDataObject.getPrimaryFile());
+                dataObject = DataObject.find(report.getFileObject());
             } catch (DataObjectNotFoundException e) {
             }
             if (dataObject != null) {
-                LineCookie lineCookie = (LineCookie) dataObject.getCookie(LineCookie.class);
+                LineCookie lineCookie = dataObject.getCookie(LineCookie.class);
                 if (lineCookie != null) {
                     Line line = lineCookie.getLineSet().getOriginal(violation.getLine() - 1);
                     line.show(Line.ShowOpenType.OPEN, Line.ShowVisibilityType.FOCUS);
@@ -293,14 +288,15 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         return PREFERRED_ID;
     }
 
-    public void setViolations(CodingStandardViolation[] violations, DataObject dataObject) {
-        this.currentDataObject = dataObject;
+    public void setReport(CodingStandardValidationReport report) {
+        this.report = report;
         model.clear();
-        if (violations.length == 0) {
+        if (report.getViolations().length == 0) {
+            validCode.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.text"), report.getCodingStandard()));
             jScrollPane1.setVisible(false);
             validCode.setVisible(true);
         } else {
-            for (CodingStandardViolation violation : violations) {
+            for (CodingStandardViolation violation : report.getViolations()) {
                 model.add(violation);
             }
             validCode.setVisible(false);
@@ -318,7 +314,11 @@ class CodingStandardViolationsTableModel extends AbstractTableModel {
     /**
      * @todo I18n
      */
-    private static final String[] columnNames = {"", "Line", "Message"};
+    private static final String[] columnNames = {
+        "",
+        NbBundle.getMessage(CodingStandardViolationsTableModel.class, "CodingStandardViolationsTopComponent.model.line"),
+        NbBundle.getMessage(CodingStandardViolationsTableModel.class, "CodingStandardViolationsTopComponent.model.message")
+    };
     private static final Class<?>[] columnClasses = {ImageIcon.class, String.class, String.class};
     private ArrayList<CodingStandardViolation> visibleViolations;
     private ArrayList<ArrayList<CodingStandardViolation>> violationsBySeverity;
