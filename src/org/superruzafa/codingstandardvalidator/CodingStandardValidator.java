@@ -14,19 +14,11 @@ public interface CodingStandardValidator {
      *
      * @param file Code file.
      *
-     * @return true if the code has no strict violations.
-     *         false otherwise.
+     * @return Validation report
      * 
      * @see #getStrictnessThreshold
      */
-    public boolean validate(FileObject file) throws CodingStandardValidatorException;
-
-    /**
-     * Gets the violations from the last validation.
-     *
-     * @return Violations from the last validation.
-     */
-    public CodingStandardViolation[] getViolations();
+    public CodingStandardValidationReport validate(FileObject file) throws CodingStandardValidatorException;
 
     /**
      * Gets the severity value at which a severity is considered strict.

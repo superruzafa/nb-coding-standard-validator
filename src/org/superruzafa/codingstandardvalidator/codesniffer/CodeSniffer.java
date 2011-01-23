@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.openide.filesystems.FileObject;
@@ -17,6 +18,8 @@ import org.superruzafa.codingstandardvalidator.*;
  * @author Alfonso Ruzafa <superruzafa@gmail.com>
  */
 public class CodeSniffer implements CodingStandardValidator {
+
+    private final String VALIDATOR_ID = "PHP Code Sniffer";
 
     /**
      * Default PHP Code Sniffer script path
@@ -44,11 +47,6 @@ public class CodeSniffer implements CodingStandardValidator {
     private static final Pattern installedCodingStandardsTwoOrMorePattern = Pattern.compile(InstalledCodingStandardsTwoOrMoreRegex);
 
     /**
-     * List of violations for the current validation.
-     */
-    protected CodingStandardViolation[] violations;
-
-    /**
      * PHP Code Sniffer script path.
      */
     protected String scriptPath;
@@ -56,7 +54,7 @@ public class CodeSniffer implements CodingStandardValidator {
     /**
      * Current coding standard against which the code is validated.
      */
-    protected String codingStandardName;
+    protected String codingStandard;
 
     /**
      * Current PHP Code Sniffer report type.
@@ -77,23 +75,24 @@ public class CodeSniffer implements CodingStandardValidator {
      * Creates a new CodeSniffer object.
      */
     public CodeSniffer() {
-        violations = new CodingStandardViolation[0];
         scriptPath = DefaultScriptPath;
-        codingStandardName = "";
+        codingStandard = "";
         installedCodingStandards = new String[0];
         reportType = CodeSnifferReportType.Full;
         strictnessThreshold = CodingStandardViolationSeverity.Error;
     }
 
     @Override
-    public boolean validate(FileObject file) throws CodingStandardValidatorException {
-        boolean valid = false;
-
-        violations = new CodingStandardViolation[0];
+    public CodingStandardValidationReport validate(FileObject file) throws CodingStandardValidatorException {
+        CodingStandardValidationReportBuilder reportBuilder = new CodingStandardValidationReportBuilder();
         ArrayList<String> parameters = new ArrayList<String>();
 
-        if (!("".equals(codingStandardName))) {
-            parameters.add("--standard=" + codingStandardName);
+        reportBuilder.setValidator(VALIDATOR_ID);
+        reportBuilder.setCodingStandard(codingStandard);
+        reportBuilder.setFileObject(file);
+
+        if (!("".equals(codingStandard))) {
+            parameters.add("--standard=" + codingStandard);
         }
         switch (reportType) {
             case Full:
@@ -108,26 +107,19 @@ public class CodeSniffer implements CodingStandardValidator {
         StringBuilder output = new StringBuilder();
         try {
             int result = run(parameters, output);
-            valid = (result == 0);
+            reportBuilder.setIsValid(result == 0);
             CodeSnifferReportParser parser = parserFactory(reportType);
             if (parser != null
                     && parser.parse(output.toString())) {
-                violations = parser.getViolations();
+                reportBuilder.setViolations(parser.getViolations());
             }
         } catch (Exception e) {
-            valid = false;
-            violations = new CodingStandardViolation[0];
             CodingStandardValidatorException csve = new CodingStandardValidatorException();
             csve.initCause(e);
             throw csve;
         }
 
-        return valid;
-    }
-
-    @Override
-    public CodingStandardViolation[] getViolations() {
-        return violations;
+        return reportBuilder.getReport();
     }
 
     @Override
@@ -164,16 +156,16 @@ public class CodeSniffer implements CodingStandardValidator {
      * @return Coding standard name.
      */
     public String getCodingStandardName() {
-        return codingStandardName;
+        return codingStandard;
     }
 
     /**
      * Sets the current coding standard against which the code is validated.
      *
-     * @param codingStandardName Coding standard name.
+     * @param codingStandard Coding standard name.
      */
     public void setCodingStandardName(String codingStandardName) {
-        this.codingStandardName = codingStandardName;
+        this.codingStandard = codingStandardName;
     }
 
     /**
