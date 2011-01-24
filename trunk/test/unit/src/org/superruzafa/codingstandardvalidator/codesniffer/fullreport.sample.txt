@@ -1,0 +1,18 @@
+FILE: ... Settings\Alfonso\Mis documentos\NetBeansProjects\PhpProject1\index.php
+
+--------------------------------------------------------------------------------
+
+FOUND 8 ERROR(S) AND 1 WARNING(S) AFFECTING 3 LINE(S)
+--------------------------------------------------------------------------------
+
+ 1 | ERROR   | There must be exactly one blank line before the tags in file
+   |         | comment
+ 2 | WARNING | PHP version not specified
+ 3 | ERROR   | Missing @category tag in file comment
+ 4 | ERROR   | Missing @package tag in file comment
+ 5 | ERROR   | Missing @author tag in file comment
+ 6 | ERROR   | Missing @license tag in file comment
+ 7 | ERROR   | Missing @link tag in file comment
+ 8 | ERROR   | Class name must begin with a capital letter
+ 9 | ERROR   | Missing class doc comment
+--------------------------------------------------------------------------------
