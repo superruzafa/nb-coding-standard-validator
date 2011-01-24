@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.openide.filesystems.FileObject;
@@ -16,6 +15,7 @@ import org.superruzafa.codingstandardvalidator.*;
  * A PHP Code Sniffer frontend.
  *
  * @author Alfonso Ruzafa <superruzafa@gmail.com>
+ * @since 0.1
  */
 public class CodeSniffer implements CodingStandardValidator {
 

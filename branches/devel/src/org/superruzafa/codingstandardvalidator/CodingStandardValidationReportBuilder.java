@@ -7,6 +7,7 @@ import org.openide.filesystems.FileObject;
  * A CodingStandardValidationReport builder.
  * 
  * @author Alfonso Ruzafa <superruzafa@gmail.com>
+ * @since 0.1
  */
 public class CodingStandardValidationReportBuilder {
 

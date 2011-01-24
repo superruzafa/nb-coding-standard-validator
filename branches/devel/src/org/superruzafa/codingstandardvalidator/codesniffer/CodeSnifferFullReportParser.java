@@ -9,6 +9,7 @@ import org.superruzafa.codingstandardvalidator.CodingStandardViolationSeverity;
  * PHP Code Sniffer full reports parser.
  *
  * @author Alfonso Ruzafa <superruzafa@gmail.com>
+ * @since 0.1
  */
 public class CodeSnifferFullReportParser extends CodeSnifferReportParser {
 
