@@ -4,6 +4,7 @@ package org.superruzafa.codingstandardvalidator;
  * A violation of a coding standard.
  * 
  * @author Alfonso Ruzafa <superruzafa@gmail.com>
+ * @since 0.1
  */
 public class CodingStandardViolation {
 

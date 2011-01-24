@@ -7,6 +7,7 @@ import org.openide.filesystems.FileObject;
  * Result of a validation operation.
  *
  * @author Alfonso Ruzafa <superruzafa@gmail.com>
+ * @since 0.1
  */
 public class CodingStandardValidationReport {
 
