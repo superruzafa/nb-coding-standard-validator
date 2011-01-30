@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
@@ -36,10 +37,19 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     private static final String PREFERRED_ID = "CodingStandardViolationsTopComponent";
     private CodingStandardViolationsTableModel model;
     private CodingStandardValidationReport report;
+    private static final String OK_ICON_PATH = "/org/superruzafa/codingstandardvalidator/ui/ok_16.png";
+    private static final String ERROR_ICON_PATH = "/org/superruzafa/codingstandardvalidator/ui/error_16.png";
+    private static final String WARNING_ICON_PATH = "/org/superruzafa/codingstandardvalidator/ui/warning_16.png";
+    private Icon okIcon;
+    private Icon warningIcon;
+    private Icon errorIcon;
 
     public CodingStandardViolationsTopComponent() {
         initComponents();
         validCode.setVisible(false);
+        okIcon = new ImageIcon(getClass().getResource(OK_ICON_PATH));
+        errorIcon = new ImageIcon(getClass().getResource(ERROR_ICON_PATH));
+        warningIcon = new ImageIcon(getClass().getResource(WARNING_ICON_PATH));
 
         setName(NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CTL_CodingStandardViolationsTopComponent"));
         setToolTipText(NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "HINT_CodingStandardViolationsTopComponent"));
@@ -176,10 +186,12 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
 
     private void showErrorsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showErrorsActionPerformed
         model.setSeverityVisibility(CodingStandardViolationSeverity.Error, showErrors.getModel().isSelected());
+        showSuitableComponent();
     }//GEN-LAST:event_showErrorsActionPerformed
 
     private void showWarningsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showWarningsActionPerformed
         model.setSeverityVisibility(CodingStandardViolationSeverity.Warning, showWarnings.getModel().isSelected());
+        showSuitableComponent();
     }//GEN-LAST:event_showWarningsActionPerformed
 
     private void jLayered1Resized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_jLayered1Resized
@@ -291,14 +303,29 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     public void setReport(CodingStandardValidationReport report) {
         this.report = report;
         model.clear();
-        if (report.getViolations().length == 0) {
-            validCode.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.text"), report.getCodingStandard()));
+        for (CodingStandardViolation violation : report.getViolations()) {
+            model.add(violation);
+        }
+        showSuitableComponent();
+    }
+
+    protected void showSuitableComponent() {
+        if (model.count() == 0) {
+            validCode.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.ok.text"), report.getCodingStandard()));
+            validCode.setIcon(okIcon);
+            jScrollPane1.setVisible(false);
+            validCode.setVisible(true);
+        } else if (model.countVisible() == 0) {
+            if (model.count(CodingStandardViolationSeverity.Error) > 0) {
+                validCode.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.error.text"), report.getCodingStandard()));
+                validCode.setIcon(errorIcon);
+            } else {
+                validCode.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.warning.text"), report.getCodingStandard()));
+                validCode.setIcon(warningIcon);
+            }
             jScrollPane1.setVisible(false);
             validCode.setVisible(true);
         } else {
-            for (CodingStandardViolation violation : report.getViolations()) {
-                model.add(violation);
-            }
             validCode.setVisible(false);
             jScrollPane1.setVisible(true);
         }
@@ -396,6 +423,24 @@ class CodingStandardViolationsTableModel extends AbstractTableModel {
             buildAllViolations();
             notifyListeners();
         }
+    }
+
+    public int count() {
+        int count = 0;
+
+        for (CodingStandardViolationSeverity severity : CodingStandardViolationSeverity.values()) {
+            count += count(severity);
+        }
+
+        return count;
+    }
+
+    public int count(CodingStandardViolationSeverity severity) {
+        return violationsBySeverity.get(severity.ordinal()).toArray().length;
+    }
+
+    public int countVisible() {
+        return visibleViolations.toArray().length;
     }
 
     public void add(CodingStandardViolation violation) {
