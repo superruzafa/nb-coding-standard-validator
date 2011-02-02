@@ -46,7 +46,7 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
 
     public CodingStandardViolationsTopComponent() {
         initComponents();
-        validCode.setVisible(false);
+        messageLabel.setVisible(false);
         okIcon = new ImageIcon(getClass().getResource(OK_ICON_PATH));
         errorIcon = new ImageIcon(getClass().getResource(ERROR_ICON_PATH));
         warningIcon = new ImageIcon(getClass().getResource(WARNING_ICON_PATH));
@@ -73,14 +73,20 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        toolbarSeparator = new javax.swing.JSeparator();
         jToolBar1 = new javax.swing.JToolBar();
         showErrors = new javax.swing.JToggleButton();
         showWarnings = new javax.swing.JToggleButton();
-        jLayeredPane1 = new javax.swing.JLayeredPane();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        mainLayeredPane = new javax.swing.JLayeredPane();
+        messageLabel = new javax.swing.JLabel();
+        violationsScrollPane = new javax.swing.JScrollPane();
         violationsTable = new javax.swing.JTable();
-        validCode = new javax.swing.JLabel();
-        jSeparator1 = new javax.swing.JSeparator();
+        summaryPanel = new javax.swing.JPanel();
+        totalErrorsLabel = new javax.swing.JLabel();
+        totalWarningsLabel = new javax.swing.JLabel();
+        summarySeparator = new javax.swing.JSeparator();
+
+        toolbarSeparator.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
         jToolBar1.setFloatable(false);
         jToolBar1.setOrientation(1);
@@ -114,12 +120,27 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         });
         jToolBar1.add(showWarnings);
 
-        jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
-        jScrollPane1.addHierarchyBoundsListener(new java.awt.event.HierarchyBoundsListener() {
+        messageLabel.setBackground(javax.swing.UIManager.getDefaults().getColor("text"));
+        messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        messageLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/superruzafa/codingstandardvalidator/ui/ok_16.png"))); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(messageLabel, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.messageLabel.text")); // NOI18N
+        messageLabel.setOpaque(true);
+        messageLabel.addHierarchyBoundsListener(new java.awt.event.HierarchyBoundsListener() {
             public void ancestorMoved(java.awt.event.HierarchyEvent evt) {
             }
             public void ancestorResized(java.awt.event.HierarchyEvent evt) {
-                jLayered1Resized(evt);
+                mainLayeredPaneResized(evt);
+            }
+        });
+        messageLabel.setBounds(110, 10, 170, 20);
+        mainLayeredPane.add(messageLabel, javax.swing.JLayeredPane.MODAL_LAYER);
+
+        violationsScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        violationsScrollPane.addHierarchyBoundsListener(new java.awt.event.HierarchyBoundsListener() {
+            public void ancestorMoved(java.awt.event.HierarchyEvent evt) {
+            }
+            public void ancestorResized(java.awt.event.HierarchyEvent evt) {
+                mainLayeredPaneResized(evt);
             }
         });
 
@@ -134,27 +155,38 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
                 violationsTableMouseClicked(evt);
             }
         });
-        jScrollPane1.setViewportView(violationsTable);
+        violationsScrollPane.setViewportView(violationsTable);
 
-        jScrollPane1.setBounds(20, 30, 190, 100);
-        jLayeredPane1.add(jScrollPane1, javax.swing.JLayeredPane.DEFAULT_LAYER);
+        violationsScrollPane.setBounds(110, 40, 170, 70);
+        mainLayeredPane.add(violationsScrollPane, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
-        validCode.setBackground(javax.swing.UIManager.getDefaults().getColor("text"));
-        validCode.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        validCode.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/superruzafa/codingstandardvalidator/ui/ok_16.png"))); // NOI18N
-        org.openide.awt.Mnemonics.setLocalizedText(validCode, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.validCode.text")); // NOI18N
-        validCode.setOpaque(true);
-        validCode.addHierarchyBoundsListener(new java.awt.event.HierarchyBoundsListener() {
-            public void ancestorMoved(java.awt.event.HierarchyEvent evt) {
-            }
-            public void ancestorResized(java.awt.event.HierarchyEvent evt) {
-                jLayered1Resized(evt);
-            }
-        });
-        validCode.setBounds(90, 30, 290, 70);
-        jLayeredPane1.add(validCode, javax.swing.JLayeredPane.MODAL_LAYER);
+        totalErrorsLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/superruzafa/codingstandardvalidator/ui/error_16_small.png"))); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(totalErrorsLabel, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.totalErrorsLabel.text")); // NOI18N
 
-        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        totalWarningsLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/superruzafa/codingstandardvalidator/ui/warning_16_small.png"))); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(totalWarningsLabel, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.totalWarningsLabel.text")); // NOI18N
+
+        javax.swing.GroupLayout summaryPanelLayout = new javax.swing.GroupLayout(summaryPanel);
+        summaryPanel.setLayout(summaryPanelLayout);
+        summaryPanelLayout.setHorizontalGroup(
+            summaryPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(summaryPanelLayout.createSequentialGroup()
+                .addComponent(totalErrorsLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(totalWarningsLabel)
+                .addContainerGap(259, Short.MAX_VALUE))
+            .addComponent(summarySeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 396, Short.MAX_VALUE)
+        );
+        summaryPanelLayout.setVerticalGroup(
+            summaryPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, summaryPanelLayout.createSequentialGroup()
+                .addGap(0, 0, 0)
+                .addComponent(summarySeparator, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addGroup(summaryPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(totalErrorsLabel)
+                    .addComponent(totalWarningsLabel)))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -162,16 +194,21 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(jLayeredPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE))
+                .addComponent(toolbarSeparator, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(mainLayeredPane, javax.swing.GroupLayout.DEFAULT_SIZE, 396, Short.MAX_VALUE)
+                    .addComponent(summaryPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
-            .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
-            .addComponent(jLayeredPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
+            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addComponent(mainLayeredPane, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
+                .addGap(0, 0, 0)
+                .addComponent(summaryPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(toolbarSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -194,10 +231,10 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         showSuitableComponent();
     }//GEN-LAST:event_showWarningsActionPerformed
 
-    private void jLayered1Resized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_jLayered1Resized
+    private void mainLayeredPaneResized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_mainLayeredPaneResized
         Component parent = evt.getComponent().getParent();
         evt.getComponent().setBounds(0, 0, parent.getWidth(), parent.getHeight());
-    }//GEN-LAST:event_jLayered1Resized
+    }//GEN-LAST:event_mainLayeredPaneResized
 
     private void violationsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_violationsTableMouseClicked
         if (evt.getClickCount() == 2
@@ -218,14 +255,19 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
 
         }
     }//GEN-LAST:event_violationsTableMouseClicked
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLayeredPane jLayeredPane1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JLayeredPane mainLayeredPane;
+    private javax.swing.JLabel messageLabel;
     private javax.swing.JToggleButton showErrors;
     private javax.swing.JToggleButton showWarnings;
-    private javax.swing.JLabel validCode;
+    private javax.swing.JPanel summaryPanel;
+    private javax.swing.JSeparator summarySeparator;
+    private javax.swing.JSeparator toolbarSeparator;
+    private javax.swing.JLabel totalErrorsLabel;
+    private javax.swing.JLabel totalWarningsLabel;
+    private javax.swing.JScrollPane violationsScrollPane;
     private javax.swing.JTable violationsTable;
     // End of variables declaration//GEN-END:variables
 
@@ -303,31 +345,46 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     public void setReport(CodingStandardValidationReport report) {
         this.report = report;
         model.clear();
+        int errors = 0, warnings = 0;
         for (CodingStandardViolation violation : report.getViolations()) {
             model.add(violation);
+            switch (violation.getSeverity())
+            {
+                case Error:
+                    ++errors;
+                    break;
+                case Warning:
+                    ++warnings;
+                    break;
+            }
         }
+        /**
+         * @todo I18n
+         */
+        totalErrorsLabel.setText(String.format("%d errors", errors));
+        totalWarningsLabel.setText(String.format("%d warnings", warnings));
         showSuitableComponent();
     }
 
     protected void showSuitableComponent() {
         if (model.count() == 0) {
-            validCode.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.ok.text"), report.getCodingStandard()));
-            validCode.setIcon(okIcon);
-            jScrollPane1.setVisible(false);
-            validCode.setVisible(true);
+            messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.ok.text"), report.getCodingStandard()));
+            messageLabel.setIcon(okIcon);
+            violationsScrollPane.setVisible(false);
+            messageLabel.setVisible(true);
         } else if (model.countVisible() == 0) {
             if (model.count(CodingStandardViolationSeverity.Error) > 0) {
-                validCode.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.error.text"), report.getCodingStandard()));
-                validCode.setIcon(errorIcon);
+                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.error.text"), report.getCodingStandard()));
+                messageLabel.setIcon(errorIcon);
             } else {
-                validCode.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.warning.text"), report.getCodingStandard()));
-                validCode.setIcon(warningIcon);
+                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.warning.text"), report.getCodingStandard()));
+                messageLabel.setIcon(warningIcon);
             }
-            jScrollPane1.setVisible(false);
-            validCode.setVisible(true);
+            violationsScrollPane.setVisible(false);
+            messageLabel.setVisible(true);
         } else {
-            validCode.setVisible(false);
-            jScrollPane1.setVisible(true);
+            messageLabel.setVisible(false);
+            violationsScrollPane.setVisible(true);
         }
     }
 }
