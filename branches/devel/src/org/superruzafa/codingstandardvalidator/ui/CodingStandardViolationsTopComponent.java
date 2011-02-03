@@ -2,6 +2,8 @@ package org.superruzafa.codingstandardvalidator.ui;
 
 import java.awt.Component;
 import java.awt.Image;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -9,6 +11,7 @@ import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
@@ -73,6 +76,10 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        violationPopupMenu = new javax.swing.JPopupMenu();
+        goToLineMenuItem = new javax.swing.JMenuItem();
+        violationPopupSeparator = new javax.swing.JPopupMenu.Separator();
+        copyMenuItem = new javax.swing.JMenuItem();
         toolbarSeparator = new javax.swing.JSeparator();
         jToolBar1 = new javax.swing.JToolBar();
         showErrors = new javax.swing.JToggleButton();
@@ -85,6 +92,23 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         totalErrorsLabel = new javax.swing.JLabel();
         totalWarningsLabel = new javax.swing.JLabel();
         summarySeparator = new javax.swing.JSeparator();
+
+        org.openide.awt.Mnemonics.setLocalizedText(goToLineMenuItem, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.goToLineMenuItem.text")); // NOI18N
+        goToLineMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                goToLineMenuItemActionPerformed(evt);
+            }
+        });
+        violationPopupMenu.add(goToLineMenuItem);
+        violationPopupMenu.add(violationPopupSeparator);
+
+        org.openide.awt.Mnemonics.setLocalizedText(copyMenuItem, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.copyMenuItem.text")); // NOI18N
+        copyMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                copyMenuItemActionPerformed(evt);
+            }
+        });
+        violationPopupMenu.add(copyMenuItem);
 
         toolbarSeparator.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
@@ -237,26 +261,48 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     }//GEN-LAST:event_mainLayeredPaneResized
 
     private void violationsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_violationsTableMouseClicked
-        if (evt.getClickCount() == 2
+        if (evt.getButton() == MouseEvent.BUTTON3) {
+            int row = violationsTable.rowAtPoint(evt.getPoint());
+            if (row != -1) {
+                ListSelectionModel selectionModel = violationsTable.getSelectionModel();
+                selectionModel.setSelectionInterval(row, row);
+                violationPopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
+            }
+        } else if (evt.getClickCount() == 2
                 && violationsTable.getSelectedRow() != -1) {
-            CodingStandardViolation violation = model.getRow(violationsTable.getSelectedRow());
-            DataObject dataObject = null;
-            try {
-                dataObject = DataObject.find(report.getFileObject());
-            } catch (DataObjectNotFoundException e) {
-            }
-            if (dataObject != null) {
-                LineCookie lineCookie = dataObject.getCookie(LineCookie.class);
-                if (lineCookie != null) {
-                    Line line = lineCookie.getLineSet().getOriginal(violation.getLine() - 1);
-                    line.show(Line.ShowOpenType.OPEN, Line.ShowVisibilityType.FOCUS);
-                }
-            }
-
+            goToLineFromCurrentSelectedViolation();
         }
     }//GEN-LAST:event_violationsTableMouseClicked
 
+    private void copyMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyMenuItemActionPerformed
+        CodingStandardViolation violation = model.getRow(violationsTable.getSelectedRow());
+        StringSelection stringSelection = new StringSelection(violation.getMessage());
+        getToolkit().getSystemClipboard().setContents(stringSelection, stringSelection);
+    }//GEN-LAST:event_copyMenuItemActionPerformed
+
+    private void goToLineMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goToLineMenuItemActionPerformed
+        goToLineFromCurrentSelectedViolation();
+    }//GEN-LAST:event_goToLineMenuItemActionPerformed
+
+    private void goToLineFromCurrentSelectedViolation() {
+        CodingStandardViolation violation = model.getRow(violationsTable.getSelectedRow());
+        DataObject dataObject = null;
+        try {
+            dataObject = DataObject.find(report.getFileObject());
+        } catch (DataObjectNotFoundException e) {
+            dataObject = null;
+        }
+        if (dataObject != null) {
+            LineCookie lineCookie = dataObject.getCookie(LineCookie.class);
+            if (lineCookie != null) {
+                Line editorLine = lineCookie.getLineSet().getOriginal(violation.getLine() - 1);
+                editorLine.show(Line.ShowOpenType.OPEN, Line.ShowVisibilityType.FOCUS);
+            }
+        }
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem copyMenuItem;
+    private javax.swing.JMenuItem goToLineMenuItem;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JLayeredPane mainLayeredPane;
     private javax.swing.JLabel messageLabel;
@@ -267,6 +313,8 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     private javax.swing.JSeparator toolbarSeparator;
     private javax.swing.JLabel totalErrorsLabel;
     private javax.swing.JLabel totalWarningsLabel;
+    private javax.swing.JPopupMenu violationPopupMenu;
+    private javax.swing.JPopupMenu.Separator violationPopupSeparator;
     private javax.swing.JScrollPane violationsScrollPane;
     private javax.swing.JTable violationsTable;
     // End of variables declaration//GEN-END:variables
@@ -348,8 +396,7 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         int errors = 0, warnings = 0;
         for (CodingStandardViolation violation : report.getViolations()) {
             model.add(violation);
-            switch (violation.getSeverity())
-            {
+            switch (violation.getSeverity()) {
                 case Error:
                     ++errors;
                     break;
