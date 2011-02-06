@@ -12,6 +12,15 @@
                 <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
                 <attr name="type" stringvalue="org.openide.loaders.DataObject"/>
             </file>
+            <file name="org-superruzafa-codingstandardvalidator-ui-CodingStandardValidatorAction.instance">
+                <attr name="delegate" methodvalue="org.openide.awt.Actions.inject"/>
+                <attr name="displayName" bundlevalue="org.superruzafa.codingstandardvalidator.ui.Bundle#CTL_CodingStandardValidatorAction"/>
+                <attr name="injectable" stringvalue="org.superruzafa.codingstandardvalidator.ui.CodingStandardValidatorAction"/>
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.context"/>
+                <attr name="noIconInMenu" boolvalue="false"/>
+                <attr name="selectionType" stringvalue="EXACTLY_ONE"/>
+                <attr name="type" stringvalue="org.openide.loaders.DataObject"/>
+            </file>
         </folder>
         <folder name="Window">
             <file name="org-superruzafa-codingstandardvalidator-ui-CodingStandardViolationsAction.instance">
@@ -43,6 +52,16 @@
         </folder>
     </folder>
     <folder name="Loaders">
+        <folder name="folder">
+            <folder name="any">
+                <folder name="Actions">
+                    <file name="org-superruzafa-codingstandardvalidator-ui-CodingStandardValidatorAction.shadow">
+                        <attr name="originalFile" stringvalue="Actions/Tools/org-superruzafa-codingstandardvalidator-ui-CodingStandardValidatorAction.instance"/>
+                        <attr name="position" intvalue="-100"/>
+                    </file>
+                </folder>
+            </folder>
+        </folder>
         <folder name="text">
             <folder name="x-php5">
                 <folder name="Actions">
