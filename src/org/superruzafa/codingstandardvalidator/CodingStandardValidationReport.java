@@ -15,27 +15,22 @@ public class CodingStandardValidationReport {
      * true when no strict errors found while validating.
      */
     protected boolean valid;
-
     /**
      * Netbeans validated file.
      */
     protected FileObject fileObject;
-
     /**
      * Coding standard name.
      */
     protected String codingStandard;
-
     /**
      * Detected violations.
      */
     protected CodingStandardViolation[] violations;
-
     /**
      * Validator name.
      */
     protected String validator;
-
     /**
      * Validation date and time.
      */
@@ -44,8 +39,7 @@ public class CodingStandardValidationReport {
     /**
      * Creates a new CodingStandardValidationReport.
      */
-    public CodingStandardValidationReport()
-    {
+    public CodingStandardValidationReport() {
         valid = false;
         fileObject = null;
         codingStandard = "";
@@ -59,8 +53,7 @@ public class CodingStandardValidationReport {
      * @return true if no strict violations were detected.
      *         false otherwise.
      */
-    public boolean isValid()
-    {
+    public boolean isValid() {
         return valid;
     }
 
@@ -69,8 +62,7 @@ public class CodingStandardValidationReport {
      *
      * @return Netbeans file.
      */
-    public FileObject getFileObject()
-    {
+    public FileObject getFileObject() {
         return fileObject;
     }
 
@@ -79,8 +71,7 @@ public class CodingStandardValidationReport {
      *
      * @return Coding standard name.
      */
-    public String getCodingStandard()
-    {
+    public String getCodingStandard() {
         return codingStandard;
     }
 
@@ -89,8 +80,7 @@ public class CodingStandardValidationReport {
      *
      * @return Detected violations.
      */
-    public CodingStandardViolation[] getViolations()
-    {
+    public CodingStandardViolation[] getViolations() {
         return violations;
     }
 
@@ -99,8 +89,7 @@ public class CodingStandardValidationReport {
      *
      * @return Validator name.
      */
-    public String getValidator()
-    {
+    public String getValidator() {
         return validator;
     }
 
@@ -109,8 +98,29 @@ public class CodingStandardValidationReport {
      *
      * @return Date and time.
      */
-    public Date getDateTime()
-    {
+    public Date getDateTime() {
         return dateTime;
+    }
+
+    public int count(CodingStandardViolationSeverity severity) {
+        int count = 0;
+        for (CodingStandardViolation violation : violations) {
+            if (violation.getSeverity() == severity) {
+                ++count;
+            }
+        }
+        return count;
+    }
+
+    public CodingStandardViolationSeverity getMostSeveralSeverity()
+    {
+        CodingStandardViolationSeverity severity = CodingStandardViolationSeverity.Information;
+        for (CodingStandardViolation violation : violations) {
+            if (violation.getSeverity().ordinal() > severity.ordinal())
+            {
+                severity = violation.getSeverity();
+            }
+        }
+        return severity;
     }
 }

@@ -3,9 +3,11 @@ package org.superruzafa.codingstandardvalidator.ui;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
@@ -15,12 +17,15 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
+import org.openide.cookies.EditorCookie;
 import org.openide.cookies.LineCookie;
+import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.text.Line;
@@ -38,14 +43,13 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     /** path to the icon used by the component and its open action */
     static final String ICON_PATH = "org/superruzafa/codingstandardvalidator/ui/codingstandardviolations.png";
     private static final String PREFERRED_ID = "CodingStandardViolationsTopComponent";
-    private CodingStandardViolationsTableModel model;
-    private CodingStandardValidationReport report;
     private static final String OK_ICON_PATH = "/org/superruzafa/codingstandardvalidator/ui/ok_16.png";
     private static final String ERROR_ICON_PATH = "/org/superruzafa/codingstandardvalidator/ui/error_16.png";
     private static final String WARNING_ICON_PATH = "/org/superruzafa/codingstandardvalidator/ui/warning_16.png";
     private Icon okIcon;
     private Icon warningIcon;
     private Icon errorIcon;
+    private MouseAdapter currentMouseListener;
 
     public CodingStandardViolationsTopComponent() {
         initComponents();
@@ -57,15 +61,6 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         setName(NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CTL_CodingStandardViolationsTopComponent"));
         setToolTipText(NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "HINT_CodingStandardViolationsTopComponent"));
         setIcon(ImageUtilities.loadImage(ICON_PATH, true));
-
-        violationsTable.getColumnModel().getColumn(0).setMinWidth(24);
-        violationsTable.getColumnModel().getColumn(0).setMaxWidth(24);
-        violationsTable.getColumnModel().getColumn(0).setResizable(false);
-        violationsTable.getColumnModel().getColumn(1).setMaxWidth(92);
-
-        model = (CodingStandardViolationsTableModel) violationsTable.getModel();
-        model.setSeverityVisibility(CodingStandardViolationSeverity.Error, true);
-        model.setSeverityVisibility(CodingStandardViolationSeverity.Warning, true);
     }
 
     /** This method is called from within the constructor to
@@ -168,17 +163,11 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
             }
         });
 
-        violationsTable.setModel(new CodingStandardViolationsTableModel());
         violationsTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_LAST_COLUMN);
         violationsTable.setFillsViewportHeight(true);
         violationsTable.setRowHeight(20);
         violationsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         violationsTable.getTableHeader().setReorderingAllowed(false);
-        violationsTable.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                violationsTableMouseClicked(evt);
-            }
-        });
         violationsScrollPane.setViewportView(violationsTable);
 
         violationsScrollPane.setBounds(110, 40, 170, 70);
@@ -246,13 +235,17 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     }
 
     private void showErrorsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showErrorsActionPerformed
-        model.setSeverityVisibility(CodingStandardViolationSeverity.Error, showErrors.getModel().isSelected());
-        showSuitableComponent();
+        CodingStandardViolationsTableModel model = (CodingStandardViolationsTableModel) violationsTable.getModel();
+        if (model != null) {
+            model.setSeverityVisibility(CodingStandardViolationSeverity.Error, showErrors.getModel().isSelected());
+        }
     }//GEN-LAST:event_showErrorsActionPerformed
 
     private void showWarningsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showWarningsActionPerformed
-        model.setSeverityVisibility(CodingStandardViolationSeverity.Warning, showWarnings.getModel().isSelected());
-        showSuitableComponent();
+        CodingStandardViolationsTableModel model = (CodingStandardViolationsTableModel) violationsTable.getModel();
+        if (model != null) {
+            model.setSeverityVisibility(CodingStandardViolationSeverity.Warning, showWarnings.getModel().isSelected());
+        }
     }//GEN-LAST:event_showWarningsActionPerformed
 
     private void mainLayeredPaneResized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_mainLayeredPaneResized
@@ -260,44 +253,29 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         evt.getComponent().setBounds(0, 0, parent.getWidth(), parent.getHeight());
     }//GEN-LAST:event_mainLayeredPaneResized
 
-    private void violationsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_violationsTableMouseClicked
-        if (evt.getButton() == MouseEvent.BUTTON3) {
-            int row = violationsTable.rowAtPoint(evt.getPoint());
-            if (row != -1) {
-                ListSelectionModel selectionModel = violationsTable.getSelectionModel();
-                selectionModel.setSelectionInterval(row, row);
-                violationPopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
-            }
-        } else if (evt.getClickCount() == 2
-                && violationsTable.getSelectedRow() != -1) {
-            goToLineFromCurrentSelectedViolation();
-        }
-    }//GEN-LAST:event_violationsTableMouseClicked
-
     private void copyMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyMenuItemActionPerformed
-        CodingStandardViolation violation = model.getRow(violationsTable.getSelectedRow());
+        CodingStandardViolation violation = ((CodingStandardViolationsFileTableModel) violationsTable.getModel()).getRow(violationsTable.getSelectedRow());
         StringSelection stringSelection = new StringSelection(violation.getMessage());
         getToolkit().getSystemClipboard().setContents(stringSelection, stringSelection);
     }//GEN-LAST:event_copyMenuItemActionPerformed
 
     private void goToLineMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goToLineMenuItemActionPerformed
-        goToLineFromCurrentSelectedViolation();
+//        goToLineFromCurrentSelectedViolation();
     }//GEN-LAST:event_goToLineMenuItemActionPerformed
 
-    private void goToLineFromCurrentSelectedViolation() {
-        CodingStandardViolation violation = model.getRow(violationsTable.getSelectedRow());
-        DataObject dataObject = null;
+    private void showFile(FileObject fileObject) {
         try {
-            dataObject = DataObject.find(report.getFileObject());
-        } catch (DataObjectNotFoundException e) {
-            dataObject = null;
+            DataObject.find(fileObject).getCookie(EditorCookie.class).open();
+        } catch (DataObjectNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
         }
-        if (dataObject != null) {
-            LineCookie lineCookie = dataObject.getCookie(LineCookie.class);
-            if (lineCookie != null) {
-                Line editorLine = lineCookie.getLineSet().getOriginal(violation.getLine() - 1);
-                editorLine.show(Line.ShowOpenType.OPEN, Line.ShowVisibilityType.FOCUS);
-            }
+    }
+
+    private void showFile(FileObject fileObject, int line) {
+        try {
+            DataObject.find(fileObject).getCookie(LineCookie.class).getLineSet().getOriginal(line - 1).show(Line.ShowOpenType.OPEN, Line.ShowVisibilityType.FOCUS);
+        } catch (DataObjectNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
         }
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -390,13 +368,77 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         return PREFERRED_ID;
     }
 
-    public void setReport(CodingStandardValidationReport report) {
-        this.report = report;
-        model.clear();
+    public void setReport(final CodingStandardValidationReport report, final String codingStandard) {
+        /**
+         * @todo I18n
+         */
+        totalErrorsLabel.setText(String.format("%d errors", report.count(CodingStandardViolationSeverity.Error)));
+        totalWarningsLabel.setText(String.format("%d warnings", report.count(CodingStandardViolationSeverity.Warning)));
+        final CodingStandardViolationsFileTableModel model = new CodingStandardViolationsFileTableModel();
+        violationsTable.setModel(model);
+        violationsTable.getColumnModel().getColumn(0).setMaxWidth(24);
+        violationsTable.getColumnModel().getColumn(1).setMaxWidth(48);
+        if (currentMouseListener != null) {
+            violationsTable.removeMouseListener(currentMouseListener);
+        }
+        currentMouseListener = new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+                CodingStandardViolation violation = model.getRow(violationsTable.getSelectedRow());
+                if (violation != null) {
+                    if (evt.getButton() == MouseEvent.BUTTON3) {
+                        int row = violationsTable.rowAtPoint(evt.getPoint());
+                        if (row != -1) {
+                            ListSelectionModel selectionModel = violationsTable.getSelectionModel();
+                            selectionModel.setSelectionInterval(row, row);
+                            violationPopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
+                        }
+                    } else if (evt.getClickCount() == 2) {
+                        showFile(report.getFileObject(), violation.getLine());
+                    }
+                }
+            }
+        };
+        violationsTable.addMouseListener(currentMouseListener);
+        model.setSeverityVisibility(CodingStandardViolationSeverity.Error, showErrors.getModel().isSelected());
+        model.setSeverityVisibility(CodingStandardViolationSeverity.Warning, showWarnings.getModel().isSelected());
+        model.addTableModelListener(
+                new TableModelListener() {
+
+                    @Override
+                    public void tableChanged(TableModelEvent e) {
+                        if (model.getRowCount() == 0) {
+                            if (model.getRowCount(CodingStandardViolationSeverity.Error) > 0) {
+                                messageLabel.setIcon(errorIcon);
+                                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.fileValidation.error.text"), codingStandard));
+                            } else if (model.getRowCount(CodingStandardViolationSeverity.Warning) > 0) {
+                                messageLabel.setIcon(warningIcon);
+                                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.fileValidation.warning.text"), codingStandard));
+                            } else {
+                                messageLabel.setIcon(okIcon);
+                                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.fileValidation.ok.text"), codingStandard));
+                            }
+                            violationsScrollPane.setVisible(false);
+                            messageLabel.setVisible(true);
+                        } else {
+                            messageLabel.setVisible(false);
+                            violationsScrollPane.setVisible(true);
+                        }
+                    }
+                });
+
+        if (report.getViolations().length == 0) {
+            model.fireTableDataChanged();
+        } else {
+            model.addAll(Arrays.asList(report.getViolations()));
+        }
+    }
+
+    public void setReport(CodingStandardValidationReport[] reports) {
         int errors = 0, warnings = 0;
-        for (CodingStandardViolation violation : report.getViolations()) {
-            model.add(violation);
-            switch (violation.getSeverity()) {
+        for (CodingStandardValidationReport report : reports) {
+            switch (report.getMostSeveralSeverity()) {
                 case Error:
                     ++errors;
                     break;
@@ -405,69 +447,163 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
                     break;
             }
         }
-        /**
-         * @todo I18n
-         */
-        totalErrorsLabel.setText(String.format("%d errors", errors));
-        totalWarningsLabel.setText(String.format("%d warnings", warnings));
-        showSuitableComponent();
-    }
+        totalErrorsLabel.setText(String.format("%d files with errors", errors));
+        totalWarningsLabel.setText(String.format("%d files with warnings", warnings));
+        final CodingStandardViolationsFolderTableModel model = new CodingStandardViolationsFolderTableModel();
+        violationsTable.setModel(model);
+        violationsTable.getColumnModel().getColumn(0).setMaxWidth(24);
+        if (currentMouseListener != null) {
+            violationsTable.removeMouseListener(currentMouseListener);
+        }
+        currentMouseListener = new MouseAdapter() {
 
-    protected void showSuitableComponent() {
-        if (model.count() == 0) {
-            messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.ok.text"), report.getCodingStandard()));
-            messageLabel.setIcon(okIcon);
-            violationsScrollPane.setVisible(false);
-            messageLabel.setVisible(true);
-        } else if (model.countVisible() == 0) {
-            if (model.count(CodingStandardViolationSeverity.Error) > 0) {
-                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.error.text"), report.getCodingStandard()));
-                messageLabel.setIcon(errorIcon);
-            } else {
-                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.warning.text"), report.getCodingStandard()));
-                messageLabel.setIcon(warningIcon);
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+                CodingStandardValidationReport report = model.getRow(violationsTable.getSelectedRow());
+                if (report != null) {
+                    if (evt.getButton() == MouseEvent.BUTTON3) {
+                        int row = violationsTable.rowAtPoint(evt.getPoint());
+                        if (row != -1) {
+                            ListSelectionModel selectionModel = violationsTable.getSelectionModel();
+                            selectionModel.setSelectionInterval(row, row);
+                            violationPopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
+                        }
+                    } else if (evt.getClickCount() == 2) {
+                        showFile(report.getFileObject());
+                    }
+                }
             }
-            violationsScrollPane.setVisible(false);
-            messageLabel.setVisible(true);
+        };
+        violationsTable.addMouseListener(currentMouseListener);
+        model.setSeverityVisibility(CodingStandardViolationSeverity.Error, showErrors.getModel().isSelected());
+        model.setSeverityVisibility(CodingStandardViolationSeverity.Warning, showWarnings.getModel().isSelected());
+        model.addTableModelListener(new TableModelListener() {
+
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                if (model.getRowCount() == 0) {
+                    if (model.getRowCount(CodingStandardViolationSeverity.Error) > 0) {
+                        messageLabel.setIcon(errorIcon);
+                        messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.folderValidation.error.text"), "PEAR"));
+                    } else if (model.getRowCount(CodingStandardViolationSeverity.Warning) > 0) {
+                        messageLabel.setIcon(warningIcon);
+                        messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.folderValidation.warning.text"), "PEAR"));
+                    } else {
+                        messageLabel.setIcon(okIcon);
+                        messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.folderValidation.ok.text"), "PEAR"));
+                    }
+                    violationsScrollPane.setVisible(false);
+                    messageLabel.setVisible(true);
+                } else {
+                    messageLabel.setVisible(false);
+                    violationsScrollPane.setVisible(true);
+                }
+            }
+        });
+
+        if (errors == 0 && warnings == 0) {
+            model.fireTableDataChanged();
         } else {
-            messageLabel.setVisible(false);
-            violationsScrollPane.setVisible(true);
+            model.addAll(Arrays.asList(reports));
         }
     }
 }
 
-class CodingStandardViolationsTableModel extends AbstractTableModel {
+abstract class CodingStandardViolationsTableModel<T> extends AbstractTableModel {
 
-    private static final String WARNING_ICON_PATH = "org/superruzafa/codingstandardvalidator/ui/warning_16_small.png";
-    private static final String ERROR_ICON_PATH = "org/superruzafa/codingstandardvalidator/ui/error_16_small.png";
-    private static final Image warningIcon = ImageUtilities.loadImage(WARNING_ICON_PATH);
-    private static final Image errorIcon = ImageUtilities.loadImage(ERROR_ICON_PATH);
-    /**
-     * @todo I18n
-     */
-    private static final String[] columnNames = {
-        "",
-        NbBundle.getMessage(CodingStandardViolationsTableModel.class, "CodingStandardViolationsTopComponent.model.line"),
-        NbBundle.getMessage(CodingStandardViolationsTableModel.class, "CodingStandardViolationsTopComponent.model.message")
-    };
-    private static final Class<?>[] columnClasses = {ImageIcon.class, String.class, String.class};
-    private ArrayList<CodingStandardViolation> visibleViolations;
-    private ArrayList<ArrayList<CodingStandardViolation>> violationsBySeverity;
-    private boolean[] severityVisibility;
+    protected static final String WARNING_ICON_PATH = "org/superruzafa/codingstandardvalidator/ui/warning_16_small.png";
+    protected static final String ERROR_ICON_PATH = "org/superruzafa/codingstandardvalidator/ui/error_16_small.png";
+    protected static final Image warningIcon = ImageUtilities.loadImage(WARNING_ICON_PATH);
+    protected static final Image errorIcon = ImageUtilities.loadImage(ERROR_ICON_PATH);
+    protected ArrayList<T> visibleItems;
+    protected ArrayList<ArrayList<T>> itemsBySeverity;
+    protected boolean[] severityVisibility;
 
     public CodingStandardViolationsTableModel() {
-        visibleViolations = new ArrayList<CodingStandardViolation>();
-        violationsBySeverity = new ArrayList<ArrayList<CodingStandardViolation>>();
-        for (CodingStandardViolationSeverity severity : CodingStandardViolationSeverity.values()) {
-            violationsBySeverity.add(new ArrayList<CodingStandardViolation>());
+        visibleItems = new ArrayList<T>();
+        itemsBySeverity = new ArrayList<ArrayList<T>>();
+        for (int i = 0; i < CodingStandardViolationSeverity.values().length; ++i) {
+            itemsBySeverity.add(new ArrayList<T>());
         }
         severityVisibility = new boolean[CodingStandardViolationSeverity.values().length];
     }
 
     @Override
     public int getRowCount() {
-        return visibleViolations.size();
+        return visibleItems.size();
     }
+
+    public int getRowCount(CodingStandardViolationSeverity severity) {
+        return itemsBySeverity.get(severity.ordinal()).size();
+    }
+
+    public T getRow(int rowIndex) {
+        return visibleItems.get(rowIndex);
+    }
+
+    public boolean getSeverityVisibility(CodingStandardViolationSeverity severity) {
+        return severityVisibility[severity.ordinal()];
+    }
+
+    public void setSeverityVisibility(CodingStandardViolationSeverity severity, boolean visible) {
+        if (severityVisibility[severity.ordinal()] != visible) {
+            severityVisibility[severity.ordinal()] = visible;
+            visibleItems.clear();
+            for (int i = 0; i < CodingStandardViolationSeverity.values().length; ++i) {
+                if (severityVisibility[i]) {
+                    visibleItems.addAll(itemsBySeverity.get(i));
+                }
+            }
+            sortVisibleItems();
+            notifyListeners();
+        }
+    }
+
+    public abstract void add(T item);
+
+    public void addAll(Collection<? extends T> items) {
+        for (T item : items) {
+            add(item);
+        }
+    }
+
+    public int count() {
+        int count = 0;
+        for (ArrayList<T> list : itemsBySeverity) {
+            count += list.size();
+        }
+        return count;
+    }
+
+    public int countVisible() {
+        return visibleItems.size();
+    }
+
+    public void clear() {
+        for (ArrayList<T> list : itemsBySeverity) {
+            list.clear();
+        }
+        visibleItems.clear();
+    }
+
+    protected abstract void sortVisibleItems();
+
+    protected void notifyListeners() {
+        TableModelEvent event = new TableModelEvent(this);
+        for (TableModelListener listener : getTableModelListeners()) {
+            listener.tableChanged(event);
+        }
+    }
+}
+
+class CodingStandardViolationsFileTableModel extends CodingStandardViolationsTableModel<CodingStandardViolation> {
+
+    private static final String[] columnNames = {
+        "",
+        NbBundle.getMessage(CodingStandardViolationsTableModel.class, "CodingStandardViolationsTopComponent.model.line"),
+        NbBundle.getMessage(CodingStandardViolationsTableModel.class, "CodingStandardViolationsTopComponent.model.message")
+    };
+    private static final Class<?>[] columnClasses = {ImageIcon.class, String.class, String.class};
 
     @Override
     public int getColumnCount() {
@@ -488,7 +624,7 @@ class CodingStandardViolationsTableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         Object value = null;
 
-        CodingStandardViolation violation = visibleViolations.get(rowIndex);
+        CodingStandardViolation violation = visibleItems.get(rowIndex);
         switch (columnIndex) {
             case 0: // Severity
                 switch (violation.getSeverity()) {
@@ -513,88 +649,115 @@ class CodingStandardViolationsTableModel extends AbstractTableModel {
         return value;
     }
 
-    public CodingStandardViolation getRow(int selectedRow) {
-        return visibleViolations.get(selectedRow);
-    }
-
-    public boolean getSeverityVisibility(CodingStandardViolationSeverity severity) {
-        return severityVisibility[severity.ordinal()];
-    }
-
-    public void setSeverityVisibility(CodingStandardViolationSeverity severity, boolean visible) {
-        severityVisibility[severity.ordinal()] = visible;
-        if (violationsBySeverity.get(severity.ordinal()).size() > 0) {
-            buildAllViolations();
-            notifyListeners();
-        }
-    }
-
-    public int count() {
-        int count = 0;
-
-        for (CodingStandardViolationSeverity severity : CodingStandardViolationSeverity.values()) {
-            count += count(severity);
-        }
-
-        return count;
-    }
-
-    public int count(CodingStandardViolationSeverity severity) {
-        return violationsBySeverity.get(severity.ordinal()).toArray().length;
-    }
-
-    public int countVisible() {
-        return visibleViolations.toArray().length;
-    }
-
+    @Override
     public void add(CodingStandardViolation violation) {
-        violationsBySeverity.get(violation.getSeverity().ordinal()).add(violation);
+        itemsBySeverity.get(violation.getSeverity().ordinal()).add(violation);
         if (severityVisibility[violation.getSeverity().ordinal()]) {
-            visibleViolations.add(violation);
-            notifyListeners();
-        }
-    }
-
-    void clear() {
-        visibleViolations.clear();
-        for (CodingStandardViolationSeverity severity : CodingStandardViolationSeverity.values()) {
-            violationsBySeverity.get(severity.ordinal()).clear();
+            visibleItems.add(violation);
+            sortVisibleItems();
         }
         notifyListeners();
     }
 
-    private void buildAllViolations() {
-        visibleViolations.clear();
-        for (CodingStandardViolationSeverity severity : CodingStandardViolationSeverity.values()) {
-            if (severityVisibility[severity.ordinal()]) {
-                visibleViolations.addAll(violationsBySeverity.get(severity.ordinal()));
-            }
-        }
-        Collections.sort(visibleViolations, new Comparator<CodingStandardViolation>() {
+    @Override
+    protected void sortVisibleItems() {
+        CodingStandardViolation[] items = visibleItems.toArray(new CodingStandardViolation[visibleItems.size()]);
+        Arrays.sort(items, new Comparator<CodingStandardViolation>() {
 
             @Override
-            public int compare(CodingStandardViolation o1, CodingStandardViolation o2) {
+            public int compare(CodingStandardViolation violation1, CodingStandardViolation violation2) {
                 int comparation = 0;
-
-                if (o1.getLine() < o2.getLine()) {
+                if (violation1.getLine() < violation2.getLine()) {
                     comparation = -1;
-                } else if (o1.getLine() > o2.getLine()) {
+                } else if (violation1.getLine() > violation2.getLine()) {
                     comparation = +1;
-                } else if (o1.getSeverity() == CodingStandardViolationSeverity.Error) {
+                } else if (violation1.getSeverity().ordinal() > violation2.getSeverity().ordinal()) {
                     comparation = -1;
+                } else if (violation1.getSeverity().ordinal() < violation2.getSeverity().ordinal()) {
+                    comparation = +1;
                 } else {
-                    comparation = 0;
+                    return violation1.getMessage().compareTo(violation2.getMessage());
                 }
-
                 return comparation;
             }
         });
+        visibleItems.clear();
+        visibleItems.addAll(Arrays.asList(items));
+    }
+}
+
+class CodingStandardViolationsFolderTableModel extends CodingStandardViolationsTableModel<CodingStandardValidationReport> {
+
+    /**
+     * @todo I18n
+     */
+    private static final String[] columnNames = {
+        "",
+        "File"
+    };
+    private static final Class<?>[] columnClasses = {ImageIcon.class, String.class};
+
+    @Override
+    public int getColumnCount() {
+        return columnClasses.length;
     }
 
-    private void notifyListeners() {
-        TableModelEvent event = new TableModelEvent(this);
-        for (TableModelListener listener : getTableModelListeners()) {
-            listener.tableChanged(event);
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        return columnClasses[columnIndex];
+    }
+
+    @Override
+    public String getColumnName(int columnIndex) {
+        return columnNames[columnIndex];
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        Object value = null;
+
+        CodingStandardValidationReport report = visibleItems.get(rowIndex);
+        switch (columnIndex) {
+            case 0: // Severity
+                switch (report.getMostSeveralSeverity()) {
+                    case Warning:
+                        value = warningIcon;
+                        break;
+                    case Error:
+                        value = errorIcon;
+                        break;
+                }
+                break;
+            case 1:
+                value = report.getFileObject().getPath();
+                break;
         }
+
+        return value;
+    }
+
+    @Override
+    public void add(CodingStandardValidationReport report) {
+        CodingStandardViolationSeverity severity = report.getMostSeveralSeverity();
+        itemsBySeverity.get(severity.ordinal()).add(report);
+        if (severityVisibility[severity.ordinal()]) {
+            visibleItems.add(report);
+            sortVisibleItems();
+            notifyListeners();
+        }
+    }
+
+    @Override
+    protected void sortVisibleItems() {
+        CodingStandardValidationReport[] items = visibleItems.toArray(new CodingStandardValidationReport[visibleItems.size()]);
+        Arrays.sort(items, new Comparator<CodingStandardValidationReport>() {
+
+            @Override
+            public int compare(CodingStandardValidationReport report1, CodingStandardValidationReport report2) {
+                return report1.getFileObject().getPath().compareToIgnoreCase(report2.getFileObject().getPath());
+            }
+        });
+        visibleItems.clear();
+        visibleItems.addAll(Arrays.asList(items));
     }
 }
