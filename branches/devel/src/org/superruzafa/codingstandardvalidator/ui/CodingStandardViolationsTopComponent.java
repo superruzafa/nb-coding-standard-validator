@@ -177,6 +177,7 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
 
         revalidateButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/superruzafa/codingstandardvalidator/ui/revalidate_16.png"))); // NOI18N
         org.openide.awt.Mnemonics.setLocalizedText(revalidateButton, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.revalidateButton.text")); // NOI18N
+        revalidateButton.setToolTipText(org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.revalidateButton.toolTipText")); // NOI18N
         revalidateButton.setEnabled(false);
         revalidateButton.setFocusable(false);
         revalidateButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
