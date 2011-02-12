@@ -113,8 +113,12 @@ public class CodeSniffer implements CodingStandardValidator {
                     && parser.parse(output.toString())) {
                 reportBuilder.setViolations(parser.getViolations());
             }
+            else
+            {
+                throw new CodingStandardValidatorException("Cannot parse the CodeSniffer output.");
+            }
         } catch (Exception e) {
-            CodingStandardValidatorException csve = new CodingStandardValidatorException();
+            CodingStandardValidatorException csve = new CodingStandardValidatorException(e.getMessage());
             csve.initCause(e);
             throw csve;
         }
@@ -225,7 +229,7 @@ public class CodeSniffer implements CodingStandardValidator {
             }
         } catch (Exception e) {
             installedCodingStandards = new String[0];
-            CodingStandardValidatorException csve = new CodingStandardValidatorException();
+            CodingStandardValidatorException csve = new CodingStandardValidatorException(e.getMessage());
             csve.initCause(e);
             throw csve;
         }
