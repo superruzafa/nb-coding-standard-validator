@@ -68,6 +68,7 @@ public class CodeSnifferXmlReportParser extends CodeSnifferReportParser {
         }
 
         violation.setLine(Integer.parseInt(node.getAttributes().getNamedItem("line").getTextContent()));
+        violation.setColumn(Integer.parseInt(node.getAttributes().getNamedItem("column").getTextContent()));
         violation.setMessage(node.getTextContent());
 
         return violation;

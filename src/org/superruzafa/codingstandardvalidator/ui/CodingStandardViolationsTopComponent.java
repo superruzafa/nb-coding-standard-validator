@@ -640,7 +640,9 @@ class CodingStandardViolationsFileTableModel extends CodingStandardViolationsTab
                 break;
 
             case 1:
-                value = violation.getLine();
+                value = (violation.getColumn() > 0)
+                        ? String.format("%d:%d", violation.getLine(), violation.getColumn())
+                        : violation.getLine();
                 break;
             case 2:
                 value = violation.getMessage();
@@ -671,6 +673,10 @@ class CodingStandardViolationsFileTableModel extends CodingStandardViolationsTab
                 if (violation1.getLine() < violation2.getLine()) {
                     comparation = -1;
                 } else if (violation1.getLine() > violation2.getLine()) {
+                    comparation = +1;
+                } else if (violation1.getColumn() < violation2.getColumn()) {
+                    comparation = -1;
+                } else if (violation1.getColumn() > violation2.getColumn()) {
                     comparation = +1;
                 } else if (violation1.getSeverity().ordinal() > violation2.getSeverity().ordinal()) {
                     comparation = -1;
