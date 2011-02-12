@@ -78,7 +78,7 @@ public final class CodingStandardValidatorAction implements ActionListener {
             protected void done() {
                 if (!monitor.isCanceled()) {
                     if (fileObject.isFolder()) {
-                        window.setReport(reports.toArray(new CodingStandardValidationReport[reports.size()]));
+                        window.setReport(reports.toArray(new CodingStandardValidationReport[reports.size()]), fileObject);
                     } else if (reports.size() > 0) {
                         window.setReport(reports.get(0));
                     }

@@ -6,7 +6,6 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,6 +51,7 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     private Icon warningIcon;
     private Icon errorIcon;
     private MouseAdapter currentMouseListener;
+    private FileObject lastValidatedItem;
 
     public CodingStandardViolationsTopComponent() {
         initComponents();
@@ -87,6 +87,8 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         jToolBar1 = new javax.swing.JToolBar();
         showErrors = new javax.swing.JToggleButton();
         showWarnings = new javax.swing.JToggleButton();
+        jSeparator2 = new javax.swing.JToolBar.Separator();
+        revalidateButton = new javax.swing.JButton();
         mainLayeredPane = new javax.swing.JLayeredPane();
         messageLabel = new javax.swing.JLabel();
         violationsScrollPane = new javax.swing.JScrollPane();
@@ -171,6 +173,20 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
             }
         });
         jToolBar1.add(showWarnings);
+        jToolBar1.add(jSeparator2);
+
+        revalidateButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/superruzafa/codingstandardvalidator/ui/revalidate_16.png"))); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(revalidateButton, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.revalidateButton.text")); // NOI18N
+        revalidateButton.setEnabled(false);
+        revalidateButton.setFocusable(false);
+        revalidateButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        revalidateButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        revalidateButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                revalidateButtonActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(revalidateButton);
 
         messageLabel.setBackground(javax.swing.UIManager.getDefaults().getColor("text"));
         messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -318,6 +334,14 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         getToolkit().getSystemClipboard().setContents(stringSelection, stringSelection);
     }//GEN-LAST:event_copyFileMenuItemActionPerformed
 
+    private void revalidateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_revalidateButtonActionPerformed
+        try {
+            CodingStandardValidatorAction action = new CodingStandardValidatorAction(DataObject.find(lastValidatedItem));
+            action.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, ""));
+        } catch (DataObjectNotFoundException ignore) {
+        }
+    }//GEN-LAST:event_revalidateButtonActionPerformed
+
     private void showFile(FileObject fileObject) {
         try {
             DataObject.find(fileObject).getCookie(EditorCookie.class).open();
@@ -340,10 +364,12 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     private javax.swing.JMenuItem goToLineMenuItem;
     private javax.swing.JPopupMenu jPopupMenu1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JLayeredPane mainLayeredPane;
     private javax.swing.JLabel messageLabel;
     private javax.swing.JMenuItem openFileMenuItem;
+    private javax.swing.JButton revalidateButton;
     private javax.swing.JToggleButton showErrors;
     private javax.swing.JToggleButton showWarnings;
     private javax.swing.JPanel summaryPanel;
@@ -493,9 +519,11 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         } else {
             model.addAll(Arrays.asList(report.getViolations()));
         }
+        lastValidatedItem = report.getFileObject();
+        revalidateButton.setEnabled(true);
     }
 
-    public void setReport(CodingStandardValidationReport[] reports) {
+    public void setReport(CodingStandardValidationReport[] reports, FileObject root) {
         int errors = 0, warnings = 0;
         for (CodingStandardValidationReport report : reports) {
             switch (report.getMostSeveralSeverity()) {
@@ -567,6 +595,8 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         } else {
             model.addAll(Arrays.asList(reports));
         }
+        lastValidatedItem = root;
+        revalidateButton.setEnabled(true);
     }
 }
 
