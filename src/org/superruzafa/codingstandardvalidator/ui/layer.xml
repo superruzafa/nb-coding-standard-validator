@@ -55,9 +55,17 @@
         <folder name="folder">
             <folder name="any">
                 <folder name="Actions">
+                    <file name="org-superruzafa-codingstandardvalidator-ui-CodingStandardValidatorAction-separatorAfter.instance">
+                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+                        <attr name="position" intvalue="1475"/>
+                    </file>
+                    <file name="org-superruzafa-codingstandardvalidator-ui-CodingStandardValidatorAction-separatorBefore.instance">
+                        <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
+                        <attr name="position" intvalue="1425"/>
+                    </file>
                     <file name="org-superruzafa-codingstandardvalidator-ui-CodingStandardValidatorAction.shadow">
                         <attr name="originalFile" stringvalue="Actions/Tools/org-superruzafa-codingstandardvalidator-ui-CodingStandardValidatorAction.instance"/>
-                        <attr name="position" intvalue="-100"/>
+                        <attr name="position" intvalue="1450"/>
                     </file>
                 </folder>
             </folder>
