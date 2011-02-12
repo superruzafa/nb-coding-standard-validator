@@ -2,6 +2,7 @@ package org.superruzafa.codingstandardvalidator.codesniffer;
 
 import java.util.ArrayList;
 import org.superruzafa.codingstandardvalidator.CodingStandardViolation;
+import org.superruzafa.codingstandardvalidator.CodingStandardViolationSeverity;
 
 /**
  * An generic PHP Code Sniffer reports parser.
@@ -11,13 +12,34 @@ import org.superruzafa.codingstandardvalidator.CodingStandardViolation;
  */
 abstract public class CodeSnifferReportParser {
 
+    class EditableCodingStandardViolation extends CodingStandardViolation {
+
+        public EditableCodingStandardViolation() {
+            super(1, "", CodingStandardViolationSeverity.Error);
+        }
+
+        public void setLine(int line) {
+            this.line = line;
+        }
+
+        public void setColumn(int column) {
+            this.column = column;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+        public void setSeverity(CodingStandardViolationSeverity severity) {
+            this.severity = severity;
+        }
+    }
     protected ArrayList<CodingStandardViolation> violations;
 
     /**
      * Creates a new CodeSnifferReportParser object.
      */
-    public CodeSnifferReportParser()
-    {
+    public CodeSnifferReportParser() {
         violations = new ArrayList<CodingStandardViolation>();
     }
 
@@ -36,8 +58,7 @@ abstract public class CodeSnifferReportParser {
      *
      * @return Parsed violations.
      */
-    public CodingStandardViolation[] getViolations()
-    {
+    public CodingStandardViolation[] getViolations() {
         return violations.toArray(new CodingStandardViolation[violations.size()]);
     }
 }
