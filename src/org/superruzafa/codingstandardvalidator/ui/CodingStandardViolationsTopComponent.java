@@ -3,8 +3,10 @@ package org.superruzafa.codingstandardvalidator.ui;
 import java.awt.Component;
 import java.awt.Image;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -75,6 +77,12 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         goToLineMenuItem = new javax.swing.JMenuItem();
         violationPopupSeparator = new javax.swing.JPopupMenu.Separator();
         copyMenuItem = new javax.swing.JMenuItem();
+        filePopupMenu = new javax.swing.JPopupMenu();
+        openFileMenuItem = new javax.swing.JMenuItem();
+        validateFileMenuItem = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        copyFileMenuItem = new javax.swing.JMenuItem();
+        jPopupMenu1 = new javax.swing.JPopupMenu();
         toolbarSeparator = new javax.swing.JSeparator();
         jToolBar1 = new javax.swing.JToolBar();
         showErrors = new javax.swing.JToggleButton();
@@ -104,6 +112,31 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
             }
         });
         violationPopupMenu.add(copyMenuItem);
+
+        org.openide.awt.Mnemonics.setLocalizedText(openFileMenuItem, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.openFileMenuItem.text")); // NOI18N
+        openFileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openFileMenuItemActionPerformed(evt);
+            }
+        });
+        filePopupMenu.add(openFileMenuItem);
+
+        org.openide.awt.Mnemonics.setLocalizedText(validateFileMenuItem, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.validateFileMenuItem.text")); // NOI18N
+        validateFileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                validateFileMenuItemActionPerformed(evt);
+            }
+        });
+        filePopupMenu.add(validateFileMenuItem);
+        filePopupMenu.add(jSeparator1);
+
+        org.openide.awt.Mnemonics.setLocalizedText(copyFileMenuItem, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.copyFileMenuItem.text")); // NOI18N
+        copyFileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                copyFileMenuItemActionPerformed(evt);
+            }
+        });
+        filePopupMenu.add(copyFileMenuItem);
 
         toolbarSeparator.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
@@ -260,8 +293,30 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     }//GEN-LAST:event_copyMenuItemActionPerformed
 
     private void goToLineMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goToLineMenuItemActionPerformed
-//        goToLineFromCurrentSelectedViolation();
+        CodingStandardViolationsFileTableModel model = (CodingStandardViolationsFileTableModel) violationsTable.getModel();
+        showFile(model.getFile(), model.getRow(violationsTable.getSelectedRow()).getLine());
     }//GEN-LAST:event_goToLineMenuItemActionPerformed
+
+    private void validateFileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_validateFileMenuItemActionPerformed
+        CodingStandardViolationsFolderTableModel model = (CodingStandardViolationsFolderTableModel) violationsTable.getModel();
+        try {
+            CodingStandardValidatorAction action = new CodingStandardValidatorAction(DataObject.find(model.getRow(violationsTable.getSelectedRow()).getFileObject()));
+            action.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, ""));
+        } catch (DataObjectNotFoundException ignore) {
+        }
+    }//GEN-LAST:event_validateFileMenuItemActionPerformed
+
+    private void openFileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openFileMenuItemActionPerformed
+        CodingStandardViolationsFolderTableModel model = (CodingStandardViolationsFolderTableModel) violationsTable.getModel();
+        showFile(model.getRow(violationsTable.getSelectedRow()).getFileObject());
+    }//GEN-LAST:event_openFileMenuItemActionPerformed
+
+    private void copyFileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyFileMenuItemActionPerformed
+        CodingStandardValidationReport report = ((CodingStandardViolationsFolderTableModel) violationsTable.getModel()).getRow(violationsTable.getSelectedRow());
+        StringSelection stringSelection;
+        stringSelection = new StringSelection(report.getFileObject().getPath());
+        getToolkit().getSystemClipboard().setContents(stringSelection, stringSelection);
+    }//GEN-LAST:event_copyFileMenuItemActionPerformed
 
     private void showFile(FileObject fileObject) {
         try {
@@ -279,11 +334,16 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         }
     }
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JMenuItem copyFileMenuItem;
     private javax.swing.JMenuItem copyMenuItem;
+    private javax.swing.JPopupMenu filePopupMenu;
     private javax.swing.JMenuItem goToLineMenuItem;
+    private javax.swing.JPopupMenu jPopupMenu1;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JToolBar jToolBar1;
     private javax.swing.JLayeredPane mainLayeredPane;
     private javax.swing.JLabel messageLabel;
+    private javax.swing.JMenuItem openFileMenuItem;
     private javax.swing.JToggleButton showErrors;
     private javax.swing.JToggleButton showWarnings;
     private javax.swing.JPanel summaryPanel;
@@ -291,6 +351,7 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     private javax.swing.JSeparator toolbarSeparator;
     private javax.swing.JLabel totalErrorsLabel;
     private javax.swing.JLabel totalWarningsLabel;
+    private javax.swing.JMenuItem validateFileMenuItem;
     private javax.swing.JPopupMenu violationPopupMenu;
     private javax.swing.JPopupMenu.Separator violationPopupSeparator;
     private javax.swing.JScrollPane violationsScrollPane;
@@ -374,7 +435,7 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
          */
         totalErrorsLabel.setText(String.format("%d errors", report.count(CodingStandardViolationSeverity.Error)));
         totalWarningsLabel.setText(String.format("%d warnings", report.count(CodingStandardViolationSeverity.Warning)));
-        final CodingStandardViolationsFileTableModel model = new CodingStandardViolationsFileTableModel();
+        final CodingStandardViolationsFileTableModel model = new CodingStandardViolationsFileTableModel(report.getFileObject());
         violationsTable.setModel(model);
         violationsTable.getColumnModel().getColumn(0).setMaxWidth(24);
         violationsTable.getColumnModel().getColumn(1).setMaxWidth(48);
@@ -386,18 +447,16 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
 
             @Override
             public void mouseClicked(MouseEvent evt) {
-                CodingStandardViolation violation = model.getRow(violationsTable.getSelectedRow());
-                if (violation != null) {
-                    if (evt.getButton() == MouseEvent.BUTTON3) {
-                        int row = violationsTable.rowAtPoint(evt.getPoint());
-                        if (row != -1) {
-                            ListSelectionModel selectionModel = violationsTable.getSelectionModel();
-                            selectionModel.setSelectionInterval(row, row);
-                            violationPopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
-                        }
-                    } else if (evt.getClickCount() == 2) {
-                        showFile(report2.getFileObject(), violation.getLine());
+                if (evt.getButton() == MouseEvent.BUTTON3) {
+                    int row = violationsTable.rowAtPoint(evt.getPoint());
+                    if (row != -1) {
+                        ListSelectionModel selectionModel = violationsTable.getSelectionModel();
+                        selectionModel.setSelectionInterval(row, row);
+                        violationPopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
                     }
+                } else if (violationsTable.getSelectedRowCount() > 0 && evt.getClickCount() == 2) {
+                    CodingStandardViolation violation = model.getRow(violationsTable.getSelectedRow());
+                    showFile(report2.getFileObject(), violation.getLine());
                 }
             }
         };
@@ -448,6 +507,9 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
                     break;
             }
         }
+        /**
+         * @todo I18n
+         */
         totalErrorsLabel.setText(String.format("%d files with errors", errors));
         totalWarningsLabel.setText(String.format("%d files with warnings", warnings));
         final CodingStandardViolationsFolderTableModel model = new CodingStandardViolationsFolderTableModel();
@@ -460,18 +522,16 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
 
             @Override
             public void mouseClicked(MouseEvent evt) {
-                CodingStandardValidationReport report = model.getRow(violationsTable.getSelectedRow());
-                if (report != null) {
-                    if (evt.getButton() == MouseEvent.BUTTON3) {
-                        int row = violationsTable.rowAtPoint(evt.getPoint());
-                        if (row != -1) {
-                            ListSelectionModel selectionModel = violationsTable.getSelectionModel();
-                            selectionModel.setSelectionInterval(row, row);
-                            violationPopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
-                        }
-                    } else if (evt.getClickCount() == 2) {
-                        showFile(report.getFileObject());
+                if (evt.getButton() == MouseEvent.BUTTON3) {
+                    int row = violationsTable.rowAtPoint(evt.getPoint());
+                    if (row != -1) {
+                        ListSelectionModel selectionModel = violationsTable.getSelectionModel();
+                        selectionModel.setSelectionInterval(row, row);
+                        filePopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
                     }
+                } else if (violationsTable.getSelectedRowCount() > 0 && evt.getClickCount() == 2) {
+                    CodingStandardValidationReport report = model.getRow(violationsTable.getSelectedRow());
+                    showFile(report.getFileObject());
                 }
             }
         };
@@ -605,6 +665,11 @@ class CodingStandardViolationsFileTableModel extends CodingStandardViolationsTab
         NbBundle.getMessage(CodingStandardViolationsTableModel.class, "CodingStandardViolationsTopComponent.model.message")
     };
     private static final Class<?>[] columnClasses = {ImageIcon.class, String.class, String.class};
+    private FileObject file;
+
+    public CodingStandardViolationsFileTableModel(FileObject file) {
+        this.file = file;
+    }
 
     @Override
     public int getColumnCount() {
@@ -619,6 +684,10 @@ class CodingStandardViolationsFileTableModel extends CodingStandardViolationsTab
     @Override
     public String getColumnName(int columnIndex) {
         return columnNames[columnIndex];
+    }
+
+    public FileObject getFile() {
+        return file;
     }
 
     @Override
