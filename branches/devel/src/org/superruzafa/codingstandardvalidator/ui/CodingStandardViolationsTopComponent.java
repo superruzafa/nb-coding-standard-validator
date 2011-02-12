@@ -368,7 +368,7 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         return PREFERRED_ID;
     }
 
-    public void setReport(final CodingStandardValidationReport report, final String codingStandard) {
+    public void setReport(CodingStandardValidationReport report) {
         /**
          * @todo I18n
          */
@@ -381,6 +381,7 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
         if (currentMouseListener != null) {
             violationsTable.removeMouseListener(currentMouseListener);
         }
+        final CodingStandardValidationReport report2 = report;
         currentMouseListener = new MouseAdapter() {
 
             @Override
@@ -395,7 +396,7 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
                             violationPopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
                         }
                     } else if (evt.getClickCount() == 2) {
-                        showFile(report.getFileObject(), violation.getLine());
+                        showFile(report2.getFileObject(), violation.getLine());
                     }
                 }
             }
@@ -411,13 +412,13 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
                         if (model.getRowCount() == 0) {
                             if (model.getRowCount(CodingStandardViolationSeverity.Error) > 0) {
                                 messageLabel.setIcon(errorIcon);
-                                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.fileValidation.error.text"), codingStandard));
+                                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.fileValidation.error.text"), report2.getCodingStandard()));
                             } else if (model.getRowCount(CodingStandardViolationSeverity.Warning) > 0) {
                                 messageLabel.setIcon(warningIcon);
-                                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.fileValidation.warning.text"), codingStandard));
+                                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.fileValidation.warning.text"), report2.getCodingStandard()));
                             } else {
                                 messageLabel.setIcon(okIcon);
-                                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.fileValidation.ok.text"), codingStandard));
+                                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.fileValidation.ok.text"), report2.getCodingStandard()));
                             }
                             violationsScrollPane.setVisible(false);
                             messageLabel.setVisible(true);
