@@ -7,5 +7,8 @@ package org.superruzafa.codingstandardvalidator;
  * @since 0.1
  */
 public class CodingStandardValidatorException extends Exception {
-
+    public CodingStandardValidatorException(String message)
+    {
+        super(message);
+    }
 }
