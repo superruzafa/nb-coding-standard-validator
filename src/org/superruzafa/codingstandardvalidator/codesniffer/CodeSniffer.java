@@ -98,7 +98,7 @@ public class CodeSniffer implements CodingStandardValidator {
         StringBuilder output = new StringBuilder();
         try {
             int result = run(parameters, output);
-            if (result != 0) {
+            if (result > 1) {
                 /**
                  * @todo I18n
                  */
