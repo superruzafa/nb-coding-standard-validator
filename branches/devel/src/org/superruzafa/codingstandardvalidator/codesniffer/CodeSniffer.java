@@ -70,6 +70,7 @@ public class CodeSniffer implements CodingStandardValidator {
      * List of installed coding standards.
      */
     private String[] installedCodingStandards;
+    private final static String DefaultCodingStandard = "Default";
 
     /**
      * Creates a new CodeSniffer object.
@@ -88,7 +89,7 @@ public class CodeSniffer implements CodingStandardValidator {
         ArrayList<String> parameters = new ArrayList<String>();
 
         reportBuilder.setValidator(VALIDATOR_ID);
-        reportBuilder.setCodingStandard(codingStandard);
+        reportBuilder.setCodingStandard("".equals(codingStandard) ? DefaultCodingStandard : codingStandard);
         reportBuilder.setFileObject(file);
 
         if (!("".equals(codingStandard))) {
