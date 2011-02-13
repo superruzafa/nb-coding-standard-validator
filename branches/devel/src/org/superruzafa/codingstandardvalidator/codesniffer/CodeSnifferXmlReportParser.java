@@ -65,11 +65,15 @@ public class CodeSnifferXmlReportParser extends CodeSnifferReportParser {
             violation.setSeverity(CodingStandardViolationSeverity.Error);
         } else if ("warning".equals(node.getNodeName())) {
             violation.setSeverity(CodingStandardViolationSeverity.Warning);
+        } else {
+            violation = null;
         }
 
-        violation.setLine(Integer.parseInt(node.getAttributes().getNamedItem("line").getTextContent()));
-        violation.setColumn(Integer.parseInt(node.getAttributes().getNamedItem("column").getTextContent()));
-        violation.setMessage(node.getTextContent());
+        if (violation != null) {
+            violation.setLine(Integer.parseInt(node.getAttributes().getNamedItem("line").getTextContent()));
+            violation.setColumn(Integer.parseInt(node.getAttributes().getNamedItem("column").getTextContent()));
+            violation.setMessage(node.getTextContent());
+        }
 
         return violation;
     }
