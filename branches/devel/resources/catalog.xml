@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE module_updates PUBLIC "-//NetBeans//DTD Autoupdate Catalog 2.6//EN"
+"http://www.netbeans.org/dtds/autoupdate-catalog-2_6.dtd">
+
+<module_updates timestamp="00/05/21/15/02/2011">
+	<module
+		autoload="true"
+		codenamebase="org.superruzafa.codingstandardvalidator"
+		distribution="org-superruzafa-codingstandardvalidator-0.2.nbm"
+		downloadsize="29505"
+		eager="false"
+		homepage="http://code.google.com/p/nb-coding-standard-validator"
+		license="B5DCE63"
+		moduleauthor="Alfonso Ruzafa"
+		needsrestart="false"
+		releasedate="2011/02/15">
+		<manifest
+			AutoUpdate-Show-In-Client="true"
+			OpenIDE-Module="org.superruzafa.codingstandardvalidator/1"
+			OpenIDE-Module-Display-Category="Tools" 
+			OpenIDE-Module-Implementation-Version="1"
+			OpenIDE-Module-Java-Dependencies="Java &gt; 1.6"
+			OpenIDE-Module-Name="Coding Standard Validator"
+			OpenIDE-Module-Requires="org.openide.windows.WindowManager, org.openide.modules.ModuleFormat1"
+			OpenIDE-Module-Module-Dependencies="org.netbeans.modules.options.api/1 &gt; 1.18.1, org.netbeans.modules.projectapi/1 &gt; 1.31.1, org.netbeans.modules.settings/1 &gt; 1.26.1, org.openide.awt &gt; 7.23.1, org.openide.dialogs &gt; 7.15.1, org.openide.filesystems &gt; 7.38.2, org.openide.loaders &gt; 7.16.1, org.openide.nodes &gt; 7.16.1, org.openide.text &gt; 6.30.1, org.openide.util &gt; 8.6.2, org.openide.util.lookup &gt; 8.3.1, org.openide.windows &gt; 6.33.1" 
+			OpenIDE-Module-Specification-Version="0.2"
+			OpenIDE-Module-Long-Description="Validate your coding style against a coding standard."
+			OpenIDE-Module-Short-Description="Validate your coding style against a coding standard."
+		/>
+	</module>
+	<license name="B5DCE63" url="../source/browse/tags/0.2/resources/license.txt" />
+</module_updates>
