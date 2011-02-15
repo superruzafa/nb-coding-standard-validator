@@ -23,7 +23,7 @@ public class CodingStandardViolationTest {
 
     @Before
     public void setUp() {
-        violation = new CodingStandardViolation(100, "Error 100", CodingStandardViolationSeverity.Error);
+        violation = new CodingStandardViolation(100, 200, "Error 100", CodingStandardViolationSeverity.Error);
     }
 
     @After
@@ -37,6 +37,14 @@ public class CodingStandardViolationTest {
     @Test
     public void testGetLine() {
         assertEquals(100, violation.getLine());
+    }
+
+    /**
+     * Test of getColumn method, of class CodingStandardViolation.
+     */
+    @Test
+    public void testGetColumn() {
+        assertEquals(200, violation.getColumn());
     }
 
     /**
