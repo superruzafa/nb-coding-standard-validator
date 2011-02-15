@@ -20,56 +20,47 @@ import org.superruzafa.codingstandardvalidator.*;
 public class CodeSniffer implements CodingStandardValidator {
 
     private final String VALIDATOR_ID = "PHP Code Sniffer";
-
     /**
      * Default PHP Code Sniffer script path
      */
     private static final String DefaultScriptPath = "phpcs";
-
     /**
      * Regular expression to parse PHP code sniffer installed codings standards.
      */
     private static final String InstalledCodingStandardsJustOneRegex = "The only coding standard installed is\\s+([^\\s]+)";
-
     /**
      * Regular expression to parse PHP code sniffer installed codings standards.
      */
     private static final String InstalledCodingStandardsTwoOrMoreRegex = "The installed coding standards are\\s+([^\\s,]+)((\\s*,\\s*[^\\s,]+)*)\\s+and\\s+([^\\s,]+)";
-
     /**
      * Pattern to parse PHP code sniffer installed codings standards.
      */
     private static final Pattern installedCodingStandardsJustOnePattern = Pattern.compile(InstalledCodingStandardsJustOneRegex);
-    
     /**
      * Pattern to parse PHP code sniffer installed codings standards.
      */
     private static final Pattern installedCodingStandardsTwoOrMorePattern = Pattern.compile(InstalledCodingStandardsTwoOrMoreRegex);
-
     /**
      * PHP Code Sniffer script path.
      */
     protected String scriptPath;
-
     /**
      * Current coding standard against which the code is validated.
      */
     protected String codingStandard;
-
     /**
      * Current PHP Code Sniffer report type.
      */
     protected CodeSnifferReportType reportType;
-
     /**
      * Current severity strictness threshold.
      */
     protected CodingStandardViolationSeverity strictnessThreshold;
-
     /**
      * List of installed coding standards.
      */
     private String[] installedCodingStandards;
+    private final static String DefaultCodingStandard = "Default";
 
     /**
      * Creates a new CodeSniffer object.
@@ -88,7 +79,7 @@ public class CodeSniffer implements CodingStandardValidator {
         ArrayList<String> parameters = new ArrayList<String>();
 
         reportBuilder.setValidator(VALIDATOR_ID);
-        reportBuilder.setCodingStandard(codingStandard);
+        reportBuilder.setCodingStandard("".equals(codingStandard) ? DefaultCodingStandard : codingStandard);
         reportBuilder.setFileObject(file);
 
         if (!("".equals(codingStandard))) {
@@ -107,15 +98,28 @@ public class CodeSniffer implements CodingStandardValidator {
         StringBuilder output = new StringBuilder();
         try {
             int result = run(parameters, output);
+            if (result > 1) {
+                /**
+                 * @todo I18n
+                 */
+                throw new CodingStandardValidatorException("An error occurred while running Code Sniffer. Please, check the Code Sniffer settings.");
+            }
             reportBuilder.setIsValid(result == 0);
             CodeSnifferReportParser parser = parserFactory(reportType);
             if (parser != null
                     && parser.parse(output.toString())) {
                 reportBuilder.setViolations(parser.getViolations());
+            } else {
+                throw new CodingStandardValidatorException("Cannot parse the CodeSniffer output.");
             }
-        } catch (Exception e) {
-            CodingStandardValidatorException csve = new CodingStandardValidatorException();
-            csve.initCause(e);
+        } catch (Exception ex) {
+            CodingStandardValidatorException csve = null;
+            if (ex instanceof CodingStandardValidatorException) {
+                csve = (CodingStandardValidatorException) ex;
+            } else {
+                csve = new CodingStandardValidatorException(ex.getMessage());
+                csve.initCause(ex);
+            }
             throw csve;
         }
 
@@ -225,7 +229,7 @@ public class CodeSniffer implements CodingStandardValidator {
             }
         } catch (Exception e) {
             installedCodingStandards = new String[0];
-            CodingStandardValidatorException csve = new CodingStandardValidatorException();
+            CodingStandardValidatorException csve = new CodingStandardValidatorException(e.getMessage());
             csve.initCause(e);
             throw csve;
         }

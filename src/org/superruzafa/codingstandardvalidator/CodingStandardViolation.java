@@ -14,6 +14,11 @@ public class CodingStandardViolation {
     protected int line;
 
     /**
+     * Column where the violation was happened.
+     */
+    protected int column;
+
+    /**
      * A message describing the violation.
      */
     protected String message;
@@ -32,7 +37,21 @@ public class CodingStandardViolation {
      */
     public CodingStandardViolation(int line, String message,
             CodingStandardViolationSeverity severity) {
+        this(line, 0, message, severity);
+    }
+
+    /**
+     * Creates a new CodingStandardViolation object.
+     *
+     * @param line     Line where the violation was happened.
+     * @param column   Column where the violation was happened.
+     * @param message  Message describing the violation.
+     * @param severity Violation severity level.
+     */
+    public CodingStandardViolation(int line, int column, String message,
+            CodingStandardViolationSeverity severity) {
         this.line = line;
+        this.column = column;
         this.message = message;
         this.severity = severity;
     }
@@ -45,6 +64,16 @@ public class CodingStandardViolation {
     public int getLine()
     {
         return line;
+    }
+
+    /**
+     * Gets the line's column where the violation was happened.
+     *
+     * @return Line's column.
+     */
+    public int getColumn()
+    {
+        return column;
     }
 
     /**

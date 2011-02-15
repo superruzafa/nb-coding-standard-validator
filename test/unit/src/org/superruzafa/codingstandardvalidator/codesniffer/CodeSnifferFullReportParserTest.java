@@ -27,7 +27,7 @@ public class CodeSnifferFullReportParserTest {
     private static String fullReport = "";
 
     @BeforeClass
-    public static void beforeClass() throws IOException
+    public static void setUpClass() throws IOException
     {
         try {
             fullReport = "";
