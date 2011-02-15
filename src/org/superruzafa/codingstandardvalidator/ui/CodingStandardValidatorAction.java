@@ -15,9 +15,12 @@ import javax.swing.ProgressMonitor;
 import javax.swing.SwingWorker;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
+import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
+import org.openide.loaders.DataObjectNotFoundException;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.windows.WindowManager;
 import org.superruzafa.codingstandardvalidator.CodingStandardValidationReport;
@@ -103,10 +106,20 @@ public final class CodingStandardValidatorAction implements ActionListener {
                         if (file.isFolder()) {
                             files.addAll(enumerateFiles(file));
                         } else if (validatableMimeTypes.contains(file.getMIMEType())) {
+                            try {
+                                DataObject.find(file).getCookie(EditorCookie.class).saveDocument();
+                            } catch (Exception ignore) {
+                                Exceptions.printStackTrace(ignore);
+                            }
                             files.add(file);
                         }
                     }
                 } else {
+                    try {
+                        DataObject.find(masterFile).getCookie(EditorCookie.class).saveDocument();
+                    } catch (Exception ignore) {
+                        Exceptions.printStackTrace(ignore);
+                    }
                     files.add(masterFile);
                 }
 
