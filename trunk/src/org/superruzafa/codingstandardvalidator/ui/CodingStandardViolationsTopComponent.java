@@ -2,21 +2,31 @@ package org.superruzafa.codingstandardvalidator.ui;
 
 import java.awt.Component;
 import java.awt.Image;
+import java.awt.datatransfer.StringSelection;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 import org.openide.util.ImageUtilities;
 import org.netbeans.api.settings.ConvertAsProperties;
+import org.openide.cookies.EditorCookie;
 import org.openide.cookies.LineCookie;
+import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.text.Line;
@@ -34,25 +44,25 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     /** path to the icon used by the component and its open action */
     static final String ICON_PATH = "org/superruzafa/codingstandardvalidator/ui/codingstandardviolations.png";
     private static final String PREFERRED_ID = "CodingStandardViolationsTopComponent";
-    private CodingStandardViolationsTableModel model;
-    private CodingStandardValidationReport report;
+    private static final String OK_ICON_PATH = "/org/superruzafa/codingstandardvalidator/ui/ok_16.png";
+    private static final String ERROR_ICON_PATH = "/org/superruzafa/codingstandardvalidator/ui/error_16.png";
+    private static final String WARNING_ICON_PATH = "/org/superruzafa/codingstandardvalidator/ui/warning_16.png";
+    private Icon okIcon;
+    private Icon warningIcon;
+    private Icon errorIcon;
+    private MouseAdapter currentMouseListener;
+    private FileObject lastValidatedItem;
 
     public CodingStandardViolationsTopComponent() {
         initComponents();
-        validCode.setVisible(false);
+        messageLabel.setVisible(false);
+        okIcon = new ImageIcon(getClass().getResource(OK_ICON_PATH));
+        errorIcon = new ImageIcon(getClass().getResource(ERROR_ICON_PATH));
+        warningIcon = new ImageIcon(getClass().getResource(WARNING_ICON_PATH));
 
         setName(NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CTL_CodingStandardViolationsTopComponent"));
         setToolTipText(NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "HINT_CodingStandardViolationsTopComponent"));
         setIcon(ImageUtilities.loadImage(ICON_PATH, true));
-
-        violationsTable.getColumnModel().getColumn(0).setMinWidth(24);
-        violationsTable.getColumnModel().getColumn(0).setMaxWidth(24);
-        violationsTable.getColumnModel().getColumn(0).setResizable(false);
-        violationsTable.getColumnModel().getColumn(1).setMaxWidth(92);
-
-        model = (CodingStandardViolationsTableModel) violationsTable.getModel();
-        model.setSeverityVisibility(CodingStandardViolationSeverity.Error, true);
-        model.setSeverityVisibility(CodingStandardViolationSeverity.Warning, true);
     }
 
     /** This method is called from within the constructor to
@@ -63,14 +73,74 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        violationPopupMenu = new javax.swing.JPopupMenu();
+        goToLineMenuItem = new javax.swing.JMenuItem();
+        violationPopupSeparator = new javax.swing.JPopupMenu.Separator();
+        copyMenuItem = new javax.swing.JMenuItem();
+        filePopupMenu = new javax.swing.JPopupMenu();
+        openFileMenuItem = new javax.swing.JMenuItem();
+        validateFileMenuItem = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        copyFileMenuItem = new javax.swing.JMenuItem();
+        jPopupMenu1 = new javax.swing.JPopupMenu();
+        toolbarSeparator = new javax.swing.JSeparator();
         jToolBar1 = new javax.swing.JToolBar();
         showErrors = new javax.swing.JToggleButton();
         showWarnings = new javax.swing.JToggleButton();
-        jLayeredPane1 = new javax.swing.JLayeredPane();
-        jScrollPane1 = new javax.swing.JScrollPane();
+        jSeparator2 = new javax.swing.JToolBar.Separator();
+        revalidateButton = new javax.swing.JButton();
+        mainLayeredPane = new javax.swing.JLayeredPane();
+        messageLabel = new javax.swing.JLabel();
+        violationsScrollPane = new javax.swing.JScrollPane();
         violationsTable = new javax.swing.JTable();
-        validCode = new javax.swing.JLabel();
-        jSeparator1 = new javax.swing.JSeparator();
+        summaryPanel = new javax.swing.JPanel();
+        totalErrorsLabel = new javax.swing.JLabel();
+        totalWarningsLabel = new javax.swing.JLabel();
+        summarySeparator = new javax.swing.JSeparator();
+
+        org.openide.awt.Mnemonics.setLocalizedText(goToLineMenuItem, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.goToLineMenuItem.text")); // NOI18N
+        goToLineMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                goToLineMenuItemActionPerformed(evt);
+            }
+        });
+        violationPopupMenu.add(goToLineMenuItem);
+        violationPopupMenu.add(violationPopupSeparator);
+
+        org.openide.awt.Mnemonics.setLocalizedText(copyMenuItem, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.copyMenuItem.text")); // NOI18N
+        copyMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                copyMenuItemActionPerformed(evt);
+            }
+        });
+        violationPopupMenu.add(copyMenuItem);
+
+        org.openide.awt.Mnemonics.setLocalizedText(openFileMenuItem, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.openFileMenuItem.text")); // NOI18N
+        openFileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                openFileMenuItemActionPerformed(evt);
+            }
+        });
+        filePopupMenu.add(openFileMenuItem);
+
+        org.openide.awt.Mnemonics.setLocalizedText(validateFileMenuItem, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.validateFileMenuItem.text")); // NOI18N
+        validateFileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                validateFileMenuItemActionPerformed(evt);
+            }
+        });
+        filePopupMenu.add(validateFileMenuItem);
+        filePopupMenu.add(jSeparator1);
+
+        org.openide.awt.Mnemonics.setLocalizedText(copyFileMenuItem, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.copyFileMenuItem.text")); // NOI18N
+        copyFileMenuItem.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                copyFileMenuItemActionPerformed(evt);
+            }
+        });
+        filePopupMenu.add(copyFileMenuItem);
+
+        toolbarSeparator.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
         jToolBar1.setFloatable(false);
         jToolBar1.setOrientation(1);
@@ -103,48 +173,83 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
             }
         });
         jToolBar1.add(showWarnings);
+        jToolBar1.add(jSeparator2);
 
-        jScrollPane1.setBorder(BorderFactory.createEmptyBorder());
-        jScrollPane1.addHierarchyBoundsListener(new java.awt.event.HierarchyBoundsListener() {
+        revalidateButton.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/superruzafa/codingstandardvalidator/ui/revalidate_16.png"))); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(revalidateButton, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.revalidateButton.text")); // NOI18N
+        revalidateButton.setToolTipText(org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.revalidateButton.toolTipText")); // NOI18N
+        revalidateButton.setEnabled(false);
+        revalidateButton.setFocusable(false);
+        revalidateButton.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        revalidateButton.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        revalidateButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                revalidateButtonActionPerformed(evt);
+            }
+        });
+        jToolBar1.add(revalidateButton);
+
+        messageLabel.setBackground(javax.swing.UIManager.getDefaults().getColor("text"));
+        messageLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        messageLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/superruzafa/codingstandardvalidator/ui/ok_16.png"))); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(messageLabel, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.messageLabel.text")); // NOI18N
+        messageLabel.setOpaque(true);
+        messageLabel.addHierarchyBoundsListener(new java.awt.event.HierarchyBoundsListener() {
             public void ancestorMoved(java.awt.event.HierarchyEvent evt) {
             }
             public void ancestorResized(java.awt.event.HierarchyEvent evt) {
-                jLayered1Resized(evt);
+                mainLayeredPaneResized(evt);
+            }
+        });
+        messageLabel.setBounds(110, 10, 170, 20);
+        mainLayeredPane.add(messageLabel, javax.swing.JLayeredPane.MODAL_LAYER);
+
+        violationsScrollPane.setBorder(BorderFactory.createEmptyBorder());
+        violationsScrollPane.addHierarchyBoundsListener(new java.awt.event.HierarchyBoundsListener() {
+            public void ancestorMoved(java.awt.event.HierarchyEvent evt) {
+            }
+            public void ancestorResized(java.awt.event.HierarchyEvent evt) {
+                mainLayeredPaneResized(evt);
             }
         });
 
-        violationsTable.setModel(new CodingStandardViolationsTableModel());
         violationsTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_LAST_COLUMN);
         violationsTable.setFillsViewportHeight(true);
         violationsTable.setRowHeight(20);
         violationsTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         violationsTable.getTableHeader().setReorderingAllowed(false);
-        violationsTable.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                violationsTableMouseClicked(evt);
-            }
-        });
-        jScrollPane1.setViewportView(violationsTable);
+        violationsScrollPane.setViewportView(violationsTable);
 
-        jScrollPane1.setBounds(20, 30, 190, 100);
-        jLayeredPane1.add(jScrollPane1, javax.swing.JLayeredPane.DEFAULT_LAYER);
+        violationsScrollPane.setBounds(110, 40, 170, 70);
+        mainLayeredPane.add(violationsScrollPane, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
-        validCode.setBackground(javax.swing.UIManager.getDefaults().getColor("text"));
-        validCode.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        validCode.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/superruzafa/codingstandardvalidator/ui/ok_16.png"))); // NOI18N
-        org.openide.awt.Mnemonics.setLocalizedText(validCode, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.validCode.text")); // NOI18N
-        validCode.setOpaque(true);
-        validCode.addHierarchyBoundsListener(new java.awt.event.HierarchyBoundsListener() {
-            public void ancestorMoved(java.awt.event.HierarchyEvent evt) {
-            }
-            public void ancestorResized(java.awt.event.HierarchyEvent evt) {
-                jLayered1Resized(evt);
-            }
-        });
-        validCode.setBounds(90, 30, 290, 70);
-        jLayeredPane1.add(validCode, javax.swing.JLayeredPane.MODAL_LAYER);
+        totalErrorsLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/superruzafa/codingstandardvalidator/ui/error_16_small.png"))); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(totalErrorsLabel, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.totalErrorsLabel.text")); // NOI18N
 
-        jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
+        totalWarningsLabel.setIcon(new javax.swing.ImageIcon(getClass().getResource("/org/superruzafa/codingstandardvalidator/ui/warning_16_small.png"))); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(totalWarningsLabel, org.openide.util.NbBundle.getMessage(CodingStandardViolationsTopComponent.class, "CodingStandardViolationsTopComponent.totalWarningsLabel.text")); // NOI18N
+
+        javax.swing.GroupLayout summaryPanelLayout = new javax.swing.GroupLayout(summaryPanel);
+        summaryPanel.setLayout(summaryPanelLayout);
+        summaryPanelLayout.setHorizontalGroup(
+            summaryPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(summaryPanelLayout.createSequentialGroup()
+                .addComponent(totalErrorsLabel)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(totalWarningsLabel)
+                .addContainerGap(259, Short.MAX_VALUE))
+            .addComponent(summarySeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 396, Short.MAX_VALUE)
+        );
+        summaryPanelLayout.setVerticalGroup(
+            summaryPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, summaryPanelLayout.createSequentialGroup()
+                .addGap(0, 0, 0)
+                .addComponent(summarySeparator, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addGroup(summaryPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(totalErrorsLabel)
+                    .addComponent(totalWarningsLabel)))
+        );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -152,16 +257,21 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jToolBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(0, 0, 0)
-                .addComponent(jLayeredPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE))
+                .addComponent(toolbarSeparator, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 0, 0)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(mainLayeredPane, javax.swing.GroupLayout.DEFAULT_SIZE, 396, Short.MAX_VALUE)
+                    .addComponent(summaryPanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
-            .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
-            .addComponent(jLayeredPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 178, Short.MAX_VALUE)
+            .addComponent(jToolBar1, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addComponent(mainLayeredPane, javax.swing.GroupLayout.DEFAULT_SIZE, 123, Short.MAX_VALUE)
+                .addGap(0, 0, 0)
+                .addComponent(summaryPanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addComponent(toolbarSeparator, javax.swing.GroupLayout.DEFAULT_SIZE, 141, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -175,45 +285,103 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     }
 
     private void showErrorsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showErrorsActionPerformed
-        model.setSeverityVisibility(CodingStandardViolationSeverity.Error, showErrors.getModel().isSelected());
+        CodingStandardViolationsTableModel model = (CodingStandardViolationsTableModel) violationsTable.getModel();
+        if (model != null) {
+            model.setSeverityVisibility(CodingStandardViolationSeverity.Error, showErrors.getModel().isSelected());
+        }
     }//GEN-LAST:event_showErrorsActionPerformed
 
     private void showWarningsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showWarningsActionPerformed
-        model.setSeverityVisibility(CodingStandardViolationSeverity.Warning, showWarnings.getModel().isSelected());
+        CodingStandardViolationsTableModel model = (CodingStandardViolationsTableModel) violationsTable.getModel();
+        if (model != null) {
+            model.setSeverityVisibility(CodingStandardViolationSeverity.Warning, showWarnings.getModel().isSelected());
+        }
     }//GEN-LAST:event_showWarningsActionPerformed
 
-    private void jLayered1Resized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_jLayered1Resized
+    private void mainLayeredPaneResized(java.awt.event.HierarchyEvent evt) {//GEN-FIRST:event_mainLayeredPaneResized
         Component parent = evt.getComponent().getParent();
         evt.getComponent().setBounds(0, 0, parent.getWidth(), parent.getHeight());
-    }//GEN-LAST:event_jLayered1Resized
+    }//GEN-LAST:event_mainLayeredPaneResized
 
-    private void violationsTableMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_violationsTableMouseClicked
-        if (evt.getClickCount() == 2
-                && violationsTable.getSelectedRow() != -1) {
-            CodingStandardViolation violation = model.getRow(violationsTable.getSelectedRow());
-            DataObject dataObject = null;
-            try {
-                dataObject = DataObject.find(report.getFileObject());
-            } catch (DataObjectNotFoundException e) {
-            }
-            if (dataObject != null) {
-                LineCookie lineCookie = dataObject.getCookie(LineCookie.class);
-                if (lineCookie != null) {
-                    Line line = lineCookie.getLineSet().getOriginal(violation.getLine() - 1);
-                    line.show(Line.ShowOpenType.OPEN, Line.ShowVisibilityType.FOCUS);
-                }
-            }
+    private void copyMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyMenuItemActionPerformed
+        CodingStandardViolation violation = ((CodingStandardViolationsFileTableModel) violationsTable.getModel()).getRow(violationsTable.getSelectedRow());
+        StringSelection stringSelection = new StringSelection(violation.getMessage());
+        getToolkit().getSystemClipboard().setContents(stringSelection, stringSelection);
+    }//GEN-LAST:event_copyMenuItemActionPerformed
 
+    private void goToLineMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_goToLineMenuItemActionPerformed
+        CodingStandardViolationsFileTableModel model = (CodingStandardViolationsFileTableModel) violationsTable.getModel();
+        showFile(model.getFile(), model.getRow(violationsTable.getSelectedRow()).getLine());
+    }//GEN-LAST:event_goToLineMenuItemActionPerformed
+
+    private void validateFileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_validateFileMenuItemActionPerformed
+        CodingStandardViolationsFolderTableModel model = (CodingStandardViolationsFolderTableModel) violationsTable.getModel();
+        try {
+            CodingStandardValidatorAction action = new CodingStandardValidatorAction(DataObject.find(model.getRow(violationsTable.getSelectedRow()).getFileObject()));
+            action.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, ""));
+        } catch (DataObjectNotFoundException ignore) {
         }
-    }//GEN-LAST:event_violationsTableMouseClicked
+    }//GEN-LAST:event_validateFileMenuItemActionPerformed
+
+    private void openFileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openFileMenuItemActionPerformed
+        CodingStandardViolationsFolderTableModel model = (CodingStandardViolationsFolderTableModel) violationsTable.getModel();
+        showFile(model.getRow(violationsTable.getSelectedRow()).getFileObject());
+    }//GEN-LAST:event_openFileMenuItemActionPerformed
+
+    private void copyFileMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyFileMenuItemActionPerformed
+        CodingStandardValidationReport report = ((CodingStandardViolationsFolderTableModel) violationsTable.getModel()).getRow(violationsTable.getSelectedRow());
+        StringSelection stringSelection;
+        stringSelection = new StringSelection(report.getFileObject().getPath());
+        getToolkit().getSystemClipboard().setContents(stringSelection, stringSelection);
+    }//GEN-LAST:event_copyFileMenuItemActionPerformed
+
+    private void revalidateButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_revalidateButtonActionPerformed
+        try {
+            CodingStandardValidatorAction action = new CodingStandardValidatorAction(DataObject.find(lastValidatedItem));
+            action.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, ""));
+        } catch (DataObjectNotFoundException ignore) {
+        }
+    }//GEN-LAST:event_revalidateButtonActionPerformed
+
+    private void showFile(FileObject fileObject) {
+        try {
+            DataObject.find(fileObject).getCookie(EditorCookie.class).open();
+        } catch (DataObjectNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
+
+    private void showFile(FileObject fileObject, int line) {
+        try {
+            DataObject.find(fileObject).getCookie(LineCookie.class).getLineSet().getOriginal(line - 1).show(Line.ShowOpenType.OPEN, Line.ShowVisibilityType.FOCUS);
+        } catch (DataObjectNotFoundException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLayeredPane jLayeredPane1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JMenuItem copyFileMenuItem;
+    private javax.swing.JMenuItem copyMenuItem;
+    private javax.swing.JPopupMenu filePopupMenu;
+    private javax.swing.JMenuItem goToLineMenuItem;
+    private javax.swing.JPopupMenu jPopupMenu1;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JToolBar.Separator jSeparator2;
     private javax.swing.JToolBar jToolBar1;
+    private javax.swing.JLayeredPane mainLayeredPane;
+    private javax.swing.JLabel messageLabel;
+    private javax.swing.JMenuItem openFileMenuItem;
+    private javax.swing.JButton revalidateButton;
     private javax.swing.JToggleButton showErrors;
     private javax.swing.JToggleButton showWarnings;
-    private javax.swing.JLabel validCode;
+    private javax.swing.JPanel summaryPanel;
+    private javax.swing.JSeparator summarySeparator;
+    private javax.swing.JSeparator toolbarSeparator;
+    private javax.swing.JLabel totalErrorsLabel;
+    private javax.swing.JLabel totalWarningsLabel;
+    private javax.swing.JMenuItem validateFileMenuItem;
+    private javax.swing.JPopupMenu violationPopupMenu;
+    private javax.swing.JPopupMenu.Separator violationPopupSeparator;
+    private javax.swing.JScrollPane violationsScrollPane;
     private javax.swing.JTable violationsTable;
     // End of variables declaration//GEN-END:variables
 
@@ -289,54 +457,352 @@ public final class CodingStandardViolationsTopComponent extends TopComponent {
     }
 
     public void setReport(CodingStandardValidationReport report) {
-        this.report = report;
-        model.clear();
-        if (report.getViolations().length == 0) {
-            validCode.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.validCode.text"), report.getCodingStandard()));
-            jScrollPane1.setVisible(false);
-            validCode.setVisible(true);
-        } else {
-            for (CodingStandardViolation violation : report.getViolations()) {
-                model.add(violation);
-            }
-            validCode.setVisible(false);
-            jScrollPane1.setVisible(true);
+        /**
+         * @todo I18n
+         */
+        totalErrorsLabel.setText(String.format("%d errors", report.count(CodingStandardViolationSeverity.Error)));
+        totalWarningsLabel.setText(String.format("%d warnings", report.count(CodingStandardViolationSeverity.Warning)));
+        final CodingStandardViolationsFileTableModel model = new CodingStandardViolationsFileTableModel(report.getFileObject());
+        violationsTable.setModel(model);
+        violationsTable.getColumnModel().getColumn(0).setMaxWidth(24);
+        violationsTable.getColumnModel().getColumn(1).setMaxWidth(48);
+        if (currentMouseListener != null) {
+            violationsTable.removeMouseListener(currentMouseListener);
         }
+        final CodingStandardValidationReport report2 = report;
+        currentMouseListener = new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+                if (evt.getButton() == MouseEvent.BUTTON3) {
+                    int row = violationsTable.rowAtPoint(evt.getPoint());
+                    if (row != -1) {
+                        ListSelectionModel selectionModel = violationsTable.getSelectionModel();
+                        selectionModel.setSelectionInterval(row, row);
+                        violationPopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
+                    }
+                } else if (violationsTable.getSelectedRowCount() > 0 && evt.getClickCount() == 2) {
+                    CodingStandardViolation violation = model.getRow(violationsTable.getSelectedRow());
+                    showFile(report2.getFileObject(), violation.getLine());
+                }
+            }
+        };
+        violationsTable.addMouseListener(currentMouseListener);
+        model.setSeverityVisibility(CodingStandardViolationSeverity.Error, showErrors.getModel().isSelected());
+        model.setSeverityVisibility(CodingStandardViolationSeverity.Warning, showWarnings.getModel().isSelected());
+        model.addTableModelListener(
+                new TableModelListener() {
+
+                    @Override
+                    public void tableChanged(TableModelEvent e) {
+                        if (model.getRowCount() == 0) {
+                            if (model.getRowCount(CodingStandardViolationSeverity.Error) > 0) {
+                                messageLabel.setIcon(errorIcon);
+                                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.fileValidation.error.text"), report2.getCodingStandard()));
+                            } else if (model.getRowCount(CodingStandardViolationSeverity.Warning) > 0) {
+                                messageLabel.setIcon(warningIcon);
+                                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.fileValidation.warning.text"), report2.getCodingStandard()));
+                            } else {
+                                messageLabel.setIcon(okIcon);
+                                messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.fileValidation.ok.text"), report2.getCodingStandard()));
+                            }
+                            violationsScrollPane.setVisible(false);
+                            messageLabel.setVisible(true);
+                        } else {
+                            messageLabel.setVisible(false);
+                            violationsScrollPane.setVisible(true);
+                        }
+                    }
+                });
+
+        if (report.getViolations().length == 0) {
+            model.fireTableDataChanged();
+        } else {
+            model.addAll(Arrays.asList(report.getViolations()));
+        }
+        lastValidatedItem = report.getFileObject();
+        revalidateButton.setEnabled(true);
+    }
+
+    public void setReport(CodingStandardValidationReport[] reports, FileObject root) {
+        int errors = 0, warnings = 0;
+        for (CodingStandardValidationReport report : reports) {
+            switch (report.getMostSeveralSeverity()) {
+                case Error:
+                    ++errors;
+                    break;
+                case Warning:
+                    ++warnings;
+                    break;
+            }
+        }
+        /**
+         * @todo I18n
+         */
+        totalErrorsLabel.setText(String.format("%d files with errors", errors));
+        totalWarningsLabel.setText(String.format("%d files with warnings", warnings));
+        final CodingStandardViolationsFolderTableModel model = new CodingStandardViolationsFolderTableModel();
+        violationsTable.setModel(model);
+        violationsTable.getColumnModel().getColumn(0).setMaxWidth(24);
+        if (currentMouseListener != null) {
+            violationsTable.removeMouseListener(currentMouseListener);
+        }
+        currentMouseListener = new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+                if (evt.getButton() == MouseEvent.BUTTON3) {
+                    int row = violationsTable.rowAtPoint(evt.getPoint());
+                    if (row != -1) {
+                        ListSelectionModel selectionModel = violationsTable.getSelectionModel();
+                        selectionModel.setSelectionInterval(row, row);
+                        filePopupMenu.show(evt.getComponent(), evt.getX(), evt.getY());
+                    }
+                } else if (violationsTable.getSelectedRowCount() > 0 && evt.getClickCount() == 2) {
+                    CodingStandardValidationReport report = model.getRow(violationsTable.getSelectedRow());
+                    showFile(report.getFileObject());
+                }
+            }
+        };
+        violationsTable.addMouseListener(currentMouseListener);
+        model.setSeverityVisibility(CodingStandardViolationSeverity.Error, showErrors.getModel().isSelected());
+        model.setSeverityVisibility(CodingStandardViolationSeverity.Warning, showWarnings.getModel().isSelected());
+        model.addTableModelListener(new TableModelListener() {
+
+            @Override
+            public void tableChanged(TableModelEvent e) {
+                if (model.getRowCount() == 0) {
+                    if (model.getRowCount(CodingStandardViolationSeverity.Error) > 0) {
+                        messageLabel.setIcon(errorIcon);
+                        messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.folderValidation.error.text"), "PEAR"));
+                    } else if (model.getRowCount(CodingStandardViolationSeverity.Warning) > 0) {
+                        messageLabel.setIcon(warningIcon);
+                        messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.folderValidation.warning.text"), "PEAR"));
+                    } else {
+                        messageLabel.setIcon(okIcon);
+                        messageLabel.setText(String.format(NbBundle.getMessage(getClass(), "CodingStandardViolationsTopComponent.folderValidation.ok.text"), "PEAR"));
+                    }
+                    violationsScrollPane.setVisible(false);
+                    messageLabel.setVisible(true);
+                } else {
+                    messageLabel.setVisible(false);
+                    violationsScrollPane.setVisible(true);
+                }
+            }
+        });
+
+        if (errors == 0 && warnings == 0) {
+            model.fireTableDataChanged();
+        } else {
+            model.addAll(Arrays.asList(reports));
+        }
+        lastValidatedItem = root;
+        revalidateButton.setEnabled(true);
     }
 }
 
-class CodingStandardViolationsTableModel extends AbstractTableModel {
+abstract class CodingStandardViolationsTableModel<T> extends AbstractTableModel {
 
-    private static final String WARNING_ICON_PATH = "org/superruzafa/codingstandardvalidator/ui/warning_16_small.png";
-    private static final String ERROR_ICON_PATH = "org/superruzafa/codingstandardvalidator/ui/error_16_small.png";
-    private static final Image warningIcon = ImageUtilities.loadImage(WARNING_ICON_PATH);
-    private static final Image errorIcon = ImageUtilities.loadImage(ERROR_ICON_PATH);
-    /**
-     * @todo I18n
-     */
-    private static final String[] columnNames = {
-        "",
-        NbBundle.getMessage(CodingStandardViolationsTableModel.class, "CodingStandardViolationsTopComponent.model.line"),
-        NbBundle.getMessage(CodingStandardViolationsTableModel.class, "CodingStandardViolationsTopComponent.model.message")
-    };
-    private static final Class<?>[] columnClasses = {ImageIcon.class, String.class, String.class};
-    private ArrayList<CodingStandardViolation> visibleViolations;
-    private ArrayList<ArrayList<CodingStandardViolation>> violationsBySeverity;
-    private boolean[] severityVisibility;
+    protected static final String WARNING_ICON_PATH = "org/superruzafa/codingstandardvalidator/ui/warning_16_small.png";
+    protected static final String ERROR_ICON_PATH = "org/superruzafa/codingstandardvalidator/ui/error_16_small.png";
+    protected static final Image warningIcon = ImageUtilities.loadImage(WARNING_ICON_PATH);
+    protected static final Image errorIcon = ImageUtilities.loadImage(ERROR_ICON_PATH);
+    protected ArrayList<T> visibleItems;
+    protected ArrayList<ArrayList<T>> itemsBySeverity;
+    protected boolean[] severityVisibility;
 
     public CodingStandardViolationsTableModel() {
-        visibleViolations = new ArrayList<CodingStandardViolation>();
-        violationsBySeverity = new ArrayList<ArrayList<CodingStandardViolation>>();
-        for (CodingStandardViolationSeverity severity : CodingStandardViolationSeverity.values()) {
-            violationsBySeverity.add(new ArrayList<CodingStandardViolation>());
+        visibleItems = new ArrayList<T>();
+        itemsBySeverity = new ArrayList<ArrayList<T>>();
+        for (int i = 0; i < CodingStandardViolationSeverity.values().length; ++i) {
+            itemsBySeverity.add(new ArrayList<T>());
         }
         severityVisibility = new boolean[CodingStandardViolationSeverity.values().length];
     }
 
     @Override
     public int getRowCount() {
-        return visibleViolations.size();
+        return visibleItems.size();
     }
+
+    public int getRowCount(CodingStandardViolationSeverity severity) {
+        return itemsBySeverity.get(severity.ordinal()).size();
+    }
+
+    public T getRow(int rowIndex) {
+        return visibleItems.get(rowIndex);
+    }
+
+    public boolean getSeverityVisibility(CodingStandardViolationSeverity severity) {
+        return severityVisibility[severity.ordinal()];
+    }
+
+    public void setSeverityVisibility(CodingStandardViolationSeverity severity, boolean visible) {
+        if (severityVisibility[severity.ordinal()] != visible) {
+            severityVisibility[severity.ordinal()] = visible;
+            visibleItems.clear();
+            for (int i = 0; i < CodingStandardViolationSeverity.values().length; ++i) {
+                if (severityVisibility[i]) {
+                    visibleItems.addAll(itemsBySeverity.get(i));
+                }
+            }
+            sortVisibleItems();
+            notifyListeners();
+        }
+    }
+
+    public abstract void add(T item);
+
+    public void addAll(Collection<? extends T> items) {
+        for (T item : items) {
+            add(item);
+        }
+    }
+
+    public int count() {
+        int count = 0;
+        for (ArrayList<T> list : itemsBySeverity) {
+            count += list.size();
+        }
+        return count;
+    }
+
+    public int countVisible() {
+        return visibleItems.size();
+    }
+
+    public void clear() {
+        for (ArrayList<T> list : itemsBySeverity) {
+            list.clear();
+        }
+        visibleItems.clear();
+    }
+
+    protected abstract void sortVisibleItems();
+
+    protected void notifyListeners() {
+        TableModelEvent event = new TableModelEvent(this);
+        for (TableModelListener listener : getTableModelListeners()) {
+            listener.tableChanged(event);
+        }
+    }
+}
+
+class CodingStandardViolationsFileTableModel extends CodingStandardViolationsTableModel<CodingStandardViolation> {
+
+    private static final String[] columnNames = {
+        "",
+        NbBundle.getMessage(CodingStandardViolationsTableModel.class, "CodingStandardViolationsTopComponent.model.line"),
+        NbBundle.getMessage(CodingStandardViolationsTableModel.class, "CodingStandardViolationsTopComponent.model.message")
+    };
+    private static final Class<?>[] columnClasses = {ImageIcon.class, String.class, String.class};
+    private FileObject file;
+
+    public CodingStandardViolationsFileTableModel(FileObject file) {
+        this.file = file;
+    }
+
+    @Override
+    public int getColumnCount() {
+        return columnClasses.length;
+    }
+
+    @Override
+    public Class<?> getColumnClass(int columnIndex) {
+        return columnClasses[columnIndex];
+    }
+
+    @Override
+    public String getColumnName(int columnIndex) {
+        return columnNames[columnIndex];
+    }
+
+    public FileObject getFile() {
+        return file;
+    }
+
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        Object value = null;
+
+        CodingStandardViolation violation = visibleItems.get(rowIndex);
+        switch (columnIndex) {
+            case 0: // Severity
+                switch (violation.getSeverity()) {
+                    case Warning:
+                        value = warningIcon;
+                        break;
+                    case Error:
+                    default:
+                        value = errorIcon;
+                        break;
+                }
+                break;
+
+            case 1:
+                value = (violation.getColumn() > 0)
+                        ? String.format("%d:%d", violation.getLine(), violation.getColumn())
+                        : violation.getLine();
+                break;
+            case 2:
+                value = violation.getMessage();
+                break;
+        }
+
+        return value;
+    }
+
+    @Override
+    public void add(CodingStandardViolation violation) {
+        itemsBySeverity.get(violation.getSeverity().ordinal()).add(violation);
+        if (severityVisibility[violation.getSeverity().ordinal()]) {
+            visibleItems.add(violation);
+            sortVisibleItems();
+        }
+        notifyListeners();
+    }
+
+    @Override
+    protected void sortVisibleItems() {
+        CodingStandardViolation[] items = visibleItems.toArray(new CodingStandardViolation[visibleItems.size()]);
+        Arrays.sort(items, new Comparator<CodingStandardViolation>() {
+
+            @Override
+            public int compare(CodingStandardViolation violation1, CodingStandardViolation violation2) {
+                int comparation = 0;
+                if (violation1.getLine() < violation2.getLine()) {
+                    comparation = -1;
+                } else if (violation1.getLine() > violation2.getLine()) {
+                    comparation = +1;
+                } else if (violation1.getColumn() < violation2.getColumn()) {
+                    comparation = -1;
+                } else if (violation1.getColumn() > violation2.getColumn()) {
+                    comparation = +1;
+                } else if (violation1.getSeverity().ordinal() > violation2.getSeverity().ordinal()) {
+                    comparation = -1;
+                } else if (violation1.getSeverity().ordinal() < violation2.getSeverity().ordinal()) {
+                    comparation = +1;
+                } else {
+                    return violation1.getMessage().compareTo(violation2.getMessage());
+                }
+                return comparation;
+            }
+        });
+        visibleItems.clear();
+        visibleItems.addAll(Arrays.asList(items));
+    }
+}
+
+class CodingStandardViolationsFolderTableModel extends CodingStandardViolationsTableModel<CodingStandardValidationReport> {
+
+    /**
+     * @todo I18n
+     */
+    private static final String[] columnNames = {
+        "",
+        "File"
+    };
+    private static final Class<?>[] columnClasses = {ImageIcon.class, String.class};
 
     @Override
     public int getColumnCount() {
@@ -357,95 +823,48 @@ class CodingStandardViolationsTableModel extends AbstractTableModel {
     public Object getValueAt(int rowIndex, int columnIndex) {
         Object value = null;
 
-        CodingStandardViolation violation = visibleViolations.get(rowIndex);
+        CodingStandardValidationReport report = visibleItems.get(rowIndex);
         switch (columnIndex) {
             case 0: // Severity
-                switch (violation.getSeverity()) {
+                switch (report.getMostSeveralSeverity()) {
                     case Warning:
                         value = warningIcon;
                         break;
                     case Error:
-                    default:
                         value = errorIcon;
                         break;
                 }
                 break;
-
             case 1:
-                value = violation.getLine();
-                break;
-            case 2:
-                value = violation.getMessage();
+                value = report.getFileObject().getPath();
                 break;
         }
 
         return value;
     }
 
-    public CodingStandardViolation getRow(int selectedRow) {
-        return visibleViolations.get(selectedRow);
-    }
-
-    public boolean getSeverityVisibility(CodingStandardViolationSeverity severity) {
-        return severityVisibility[severity.ordinal()];
-    }
-
-    public void setSeverityVisibility(CodingStandardViolationSeverity severity, boolean visible) {
-        severityVisibility[severity.ordinal()] = visible;
-        if (violationsBySeverity.get(severity.ordinal()).size() > 0) {
-            buildAllViolations();
+    @Override
+    public void add(CodingStandardValidationReport report) {
+        CodingStandardViolationSeverity severity = report.getMostSeveralSeverity();
+        itemsBySeverity.get(severity.ordinal()).add(report);
+        if (severityVisibility[severity.ordinal()]) {
+            visibleItems.add(report);
+            sortVisibleItems();
             notifyListeners();
         }
     }
 
-    public void add(CodingStandardViolation violation) {
-        violationsBySeverity.get(violation.getSeverity().ordinal()).add(violation);
-        if (severityVisibility[violation.getSeverity().ordinal()]) {
-            visibleViolations.add(violation);
-            notifyListeners();
-        }
-    }
-
-    void clear() {
-        visibleViolations.clear();
-        for (CodingStandardViolationSeverity severity : CodingStandardViolationSeverity.values()) {
-            violationsBySeverity.get(severity.ordinal()).clear();
-        }
-        notifyListeners();
-    }
-
-    private void buildAllViolations() {
-        visibleViolations.clear();
-        for (CodingStandardViolationSeverity severity : CodingStandardViolationSeverity.values()) {
-            if (severityVisibility[severity.ordinal()]) {
-                visibleViolations.addAll(violationsBySeverity.get(severity.ordinal()));
-            }
-        }
-        Collections.sort(visibleViolations, new Comparator<CodingStandardViolation>() {
+    @Override
+    protected void sortVisibleItems() {
+        CodingStandardValidationReport[] items = visibleItems.toArray(new CodingStandardValidationReport[visibleItems.size()]);
+        Arrays.sort(items, new Comparator<CodingStandardValidationReport>() {
 
             @Override
-            public int compare(CodingStandardViolation o1, CodingStandardViolation o2) {
-                int comparation = 0;
-
-                if (o1.getLine() < o2.getLine()) {
-                    comparation = -1;
-                } else if (o1.getLine() > o2.getLine()) {
-                    comparation = +1;
-                } else if (o1.getSeverity() == CodingStandardViolationSeverity.Error) {
-                    comparation = -1;
-                } else {
-                    comparation = 0;
-                }
-
-                return comparation;
+            public int compare(CodingStandardValidationReport report1, CodingStandardValidationReport report2) {
+                return report1.getFileObject().getPath().compareToIgnoreCase(report2.getFileObject().getPath());
             }
         });
-    }
-
-    private void notifyListeners() {
-        TableModelEvent event = new TableModelEvent(this);
-        for (TableModelListener listener : getTableModelListeners()) {
-            listener.tableChanged(event);
-        }
+        visibleItems.clear();
+        visibleItems.addAll(Arrays.asList(items));
     }
 }

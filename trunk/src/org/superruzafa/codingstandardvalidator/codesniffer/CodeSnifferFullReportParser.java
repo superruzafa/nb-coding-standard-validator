@@ -58,22 +58,3 @@ public class CodeSnifferFullReportParser extends CodeSnifferReportParser {
         return severity;
     }
 }
-
-class EditableCodingStandardViolation extends CodingStandardViolation {
-
-    public EditableCodingStandardViolation() {
-        super(1, "", CodingStandardViolationSeverity.Error);
-    }
-
-    public void setLine(int line) {
-        this.line = line;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public void setSeverity(CodingStandardViolationSeverity severity) {
-        this.severity = severity;
-    }
-}
